@@ -1,0 +1,23 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>SigmaPro Admin</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<style>body{font:15px system-ui,sans-serif;background:#0e1116;color:#e9ebee;margin:0;padding:24px;max-width:960px;margin-inline:auto}h1,h2{font-weight:600}input,button{font:inherit;padding:9px 12px;border-radius:6px;border:1px solid #2a3140;background:#161b22;color:#e9ebee}button{cursor:pointer}.ok{background:#3fbfa8;color:#0e1116;border:0}.no{border-color:#e5533d;color:#e5533d}table{width:100%;border-collapse:collapse;margin:10px 0 28px}td,th{border-bottom:1px solid #2a3140;padding:8px;text-align:left;vertical-align:top;font-size:14px}small{color:#909aab}</style></head><body>
+<h1>SigmaPro admin</h1><div id="login"><p>Log in with an admin email.</p><input id="em" type="email" placeholder="admin email"> <button onclick="send()">Send code</button> <input id="cd" placeholder="code" size="8"> <button onclick="check()">Log in</button></div>
+<div id="app" hidden><h2>Payments awaiting verification</h2><p><small>Match the amount and transaction ID with your bank or wallet statement before approving.</small></p><div id="pay"></div>
+<h2>Recently approved</h2><div id="rc"></div>
+<h2>Reset a customer's computer</h2><input id="re" type="email" placeholder="customer email"> <button onclick="resetDev()">Reset</button>
+<h2>Feedback, suggestions, complaints</h2><div id="fb"></div></div>
+<script>
+const CFG={SUPABASE_URL:'',SUPABASE_ANON_KEY:'',API:''}; /* same three values as index.html */
+const sb=supabase.createClient(CFG.SUPABASE_URL,CFG.SUPABASE_ANON_KEY),$=i=>document.getElementById(i),E=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const call=async(p,body)=>{const {data}=await sb.auth.getSession();const r=await fetch(CFG.API+'/'+p,{method:body?'POST':'GET',headers:{'Content-Type':'application/json',Authorization:'Bearer '+data.session.access_token},body:body?JSON.stringify(body):undefined});return {ok:r.ok,j:await r.json().catch(()=>({}))}};
+async function send(){const {error}=await sb.auth.signInWithOtp({email:$('em').value.trim()});if(error)alert(error.message)}
+async function check(){const {error}=await sb.auth.verifyOtp({email:$('em').value.trim(),token:$('cd').value.trim(),type:'email'});if(error)return alert(error.message);load()}
+const KIND={credit:'1 file',sub_30d:'Monthly pass',sub_365d:'Yearly pass'};
+async function load(){const p=await call('admin/pending');if(!p.ok)return alert('Not an admin account');$('login').hidden=true;$('app').hidden=false;
+ $('pay').innerHTML=p.j.length?`<table><tr><th>Date</th><th>Customer</th><th>Plan</th><th>PKR</th><th>Transaction ID</th><th></th></tr>${p.j.map(o=>`<tr><td>${E(o.created_at.slice(0,16).replace('T',' '))}</td><td>${E(o.profiles?.email)}</td><td>${KIND[o.kind]}</td><td>${o.amount_pkr}</td><td>${E(o.payer_ref)}<br><small>${E(o.payer_note)}</small></td><td><button class="ok" onclick="rev('${o.id}','approve')">Approve</button> <button class="no" onclick="rev('${o.id}','reject')">Reject</button></td></tr>`).join('')}</table>`:'<p><small>Nothing waiting.</small></p>';
+ const rc=await call('admin/recent');$('rc').innerHTML=rc.j.length?`<table><tr><th>Approved</th><th>Customer</th><th>Plan</th><th>PKR</th><th>Transaction ID</th></tr>${rc.j.map(o=>`<tr><td>${E((o.paid_at||'').slice(0,16).replace('T',' '))}</td><td>${E(o.profiles?.email)}</td><td>${KIND[o.kind]}</td><td>${o.amount_pkr}</td><td>${E(o.payer_ref)}</td></tr>`).join('')}</table>`:'<p><small>None yet.</small></p>';
+ const f=await call('admin/feedback');$('fb').innerHTML=`<table><tr><th>Date</th><th>Type</th><th>From</th><th>Message</th></tr>${f.j.map(x=>`<tr><td>${E(x.created_at.slice(0,10))}</td><td>${E(x.kind)}${x.rating?' · '+x.rating+'/5':''}</td><td>${E(x.name)}<br><small>${E(x.email)}</small></td><td>${E(x.message)}</td></tr>`).join('')}</table>`}
+async function rev(id,action){if(!confirm((action==='approve'?'APPROVE':'REJECT')+' this payment?\n\nOnly approve after you can see the money in your account.'))return;await call('admin/review',{id,action});load()}
+async function resetDev(){const r=await call('admin/reset-device',{email:$('re').value.trim()});alert(r.ok?'Done. The customer can register a new computer.':(r.j.error||'Failed'))}
+sb.auth.getSession().then(({data})=>{if(data.session)load()});
+</script></body></html>

@@ -1,0 +1,1528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SigmaPro — Six Sigma Statistical Engine for Master Black Belts</title>
+<meta name="description" content="SigmaPro: process capability, SPC, ANOVA and the 7 QC tools with control charts, built for quality engineers. Runs in your browser. 30 days free.">
+<meta name="theme-color" content="#0e1116">
+<meta property="og:title" content="SigmaPro: Six Sigma statistics and QC tools in your browser">
+<meta property="og:description" content="Capability, SPC, ANOVA, Pareto, fishbone and control charts with ready templates. 30 days free.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%CF%83%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jstat/1.9.4/jstat.min.js"></script>
+<style>
+:root{
+  --bg:#12161c;
+  --surface:#181d25;
+  --surface-2:#1e2530;
+  --line:#2a3140;
+  --text:#e9ebee;
+  --text-dim:#909aab;
+  --text-faint:#5c6577;
+  --amber:#f2a93b;
+  --teal:#3fbfa8;
+  --red:#e5533d;
+  --font-display:'Space Grotesk', sans-serif;
+  --font-body:'Inter', sans-serif;
+  --font-mono:'JetBrains Mono', monospace;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font-body);
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+::selection{background:var(--amber); color:#12161c;}
+a{color:inherit; text-decoration:none;}
+.wrap{max-width:1180px; margin:0 auto; padding:0 32px;}
+@media(max-width:640px){.wrap{padding:0 20px;}}
+
+/* Nav */
+nav{
+  position:sticky; top:0; z-index:100;
+  background:rgba(18,22,28,0.88);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+}
+nav .wrap{display:flex; align-items:center; justify-content:space-between; height:68px;}
+.brand{display:flex; align-items:center; gap:10px; font-family:var(--font-display); font-weight:700; font-size:1.15rem; letter-spacing:-0.01em;}
+.brand-mark{width:20px; height:20px; position:relative;}
+.brand-mark svg{width:100%; height:100%;}
+.navlinks{display:flex; align-items:center; gap:34px; font-size:0.92rem; color:var(--text-dim);}
+.navlinks a:hover{color:var(--text);}
+.navlinks{}
+.nav-cta{
+  background:var(--amber); color:#181205; font-weight:600; font-size:0.88rem;
+  padding:9px 18px; border-radius:6px; font-family:var(--font-body);
+}
+.nav-cta:hover{filter:brightness(1.08);}
+.navlinks-mobile-hide{display:flex;}
+@media(max-width:800px){.navlinks-mobile-hide{display:none;}}
+
+/* Hero */
+header.hero{padding:88px 0 64px; position:relative; overflow:hidden; border-bottom:1px solid var(--line);}
+.hero-grid{display:grid; grid-template-columns:1.05fr 0.95fr; gap:56px; align-items:center;}
+@media(max-width:900px){.hero-grid{grid-template-columns:1fr; gap:40px;}}
+.eyebrow{
+  font-family:var(--font-mono); font-size:0.76rem; letter-spacing:0.12em; text-transform:uppercase;
+  color:var(--teal); display:flex; align-items:center; gap:8px; margin-bottom:20px;
+}
+.eyebrow::before{content:''; width:7px; height:7px; border-radius:50%; background:var(--teal); box-shadow:0 0 0 3px rgba(63,191,168,0.18);}
+h1.headline{
+  font-family:var(--font-display); font-weight:600; font-size:clamp(2.1rem, 4.4vw, 3.4rem);
+  line-height:1.06; letter-spacing:-0.02em; margin-bottom:22px;
+}
+h1.headline .accent{color:var(--amber);}
+.hero-sub{color:var(--text-dim); font-size:1.05rem; max-width:520px; margin-bottom:32px;}
+.hero-actions{display:flex; gap:14px; flex-wrap:wrap; margin-bottom:38px;}
+.btn-primary{
+  background:var(--amber); color:#181205; font-weight:600; padding:13px 24px; border-radius:6px;
+  font-size:0.95rem; border:none; cursor:pointer; font-family:var(--font-body);
+}
+.btn-primary:hover{filter:brightness(1.08);}
+.btn-ghost{
+  background:transparent; color:var(--text); border:1px solid var(--line); padding:13px 24px;
+  border-radius:6px; font-size:0.95rem; cursor:pointer; font-family:var(--font-body);
+}
+.btn-ghost:hover{border-color:var(--text-faint);}
+.hero-stats{display:flex; gap:32px; flex-wrap:wrap;}
+.hero-stat b{display:block; font-family:var(--font-mono); font-size:1.3rem; color:var(--text);}
+.hero-stat span{font-size:0.78rem; color:var(--text-faint);}
+
+/* Live chart panel */
+.chart-panel{
+  background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:20px 20px 14px;
+}
+.chart-panel-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;}
+.chart-panel-head .title{font-family:var(--font-mono); font-size:0.78rem; color:var(--text-dim); letter-spacing:0.02em;}
+.status-pill{
+  font-family:var(--font-mono); font-size:0.72rem; padding:4px 10px; border-radius:20px;
+  display:flex; align-items:center; gap:6px; transition:all .3s;
+}
+.status-pill.ok{background:rgba(63,191,168,0.12); color:var(--teal);}
+.status-pill.alert{background:rgba(229,83,61,0.14); color:var(--red);}
+.status-pill .dot{width:6px; height:6px; border-radius:50%; background:currentColor;}
+.chart-panel canvas{max-height:230px;}
+.chart-legend-row{display:flex; gap:18px; margin-top:10px; padding-top:10px; border-top:1px solid var(--line); font-family:var(--font-mono); font-size:0.72rem; color:var(--text-faint); flex-wrap:wrap;}
+.chart-legend-row span b{color:var(--text-dim); font-weight:500;}
+
+/* Section shared */
+section{padding:88px 0;}
+.section-head{max-width:640px; margin-bottom:52px;}
+.section-eyebrow{font-family:var(--font-mono); font-size:0.76rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-faint); margin-bottom:12px;}
+h2.section-title{font-family:var(--font-display); font-weight:600; font-size:clamp(1.6rem,3vw,2.3rem); letter-spacing:-0.01em; margin-bottom:14px;}
+.section-desc{color:var(--text-dim); font-size:1rem;}
+
+/* Problem section */
+.problem-cards{display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--line); border:1px solid var(--line); border-radius:10px; overflow:hidden;}
+@media(max-width:760px){.problem-cards{grid-template-columns:1fr;}}
+.problem-card{background:var(--surface); padding:32px;}
+.problem-card .label{font-family:var(--font-mono); font-size:0.72rem; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:14px;}
+.problem-card.before .label{color:var(--red);}
+.problem-card.after .label{color:var(--teal);}
+.problem-card ul{list-style:none;}
+.problem-card li{display:flex; gap:10px; padding:9px 0; font-size:0.92rem; color:var(--text-dim); border-top:1px solid var(--line);}
+.problem-card li:first-of-type{border-top:none;}
+.problem-card li::before{content:'—'; color:var(--text-faint); flex-shrink:0;}
+.problem-card.after li::before{content:'✓'; color:var(--teal);}
+
+/* Features */
+.feat-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:10px; overflow:hidden;}
+@media(max-width:900px){.feat-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:520px){.feat-grid{grid-template-columns:1fr;}}
+.feat-card{background:var(--surface); padding:28px 24px; cursor:pointer; transition:background .2s;}
+.feat-card:hover{background:var(--surface-2);}
+.feat-num{font-family:var(--font-mono); font-size:0.72rem; color:var(--amber); margin-bottom:16px;}
+.feat-card h3{font-family:var(--font-display); font-size:1.05rem; margin-bottom:8px; font-weight:600;}
+.feat-card p{font-size:0.86rem; color:var(--text-faint);}
+
+/* Tool section */
+#tool{background:var(--surface); border-top:1px solid var(--line); border-bottom:1px solid var(--line);}
+.tabbar{display:flex; gap:4px; background:var(--surface-2); padding:4px; border-radius:8px; margin-bottom:32px; flex-wrap:wrap; width:fit-content;}
+.tabbtn{
+  font-family:var(--font-mono); font-size:0.82rem; padding:10px 18px; border-radius:6px; cursor:pointer;
+  color:var(--text-faint); background:transparent; border:none;
+}
+.tabbtn.active{background:var(--bg); color:var(--amber);}
+.tool-panel{display:none;}
+.tool-panel.active{display:block;}
+.tool-layout{display:grid; grid-template-columns:340px 1fr; gap:28px; align-items:start;}
+@media(max-width:900px){.tool-layout{grid-template-columns:1fr;}}
+.card{background:var(--bg); border:1px solid var(--line); border-radius:10px; padding:24px;}
+.card h4{font-family:var(--font-mono); font-size:0.78rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-faint); margin-bottom:18px;}
+.field{margin-bottom:16px;}
+.field label{display:block; font-size:0.82rem; color:var(--text-dim); margin-bottom:6px;}
+.field input[type=text], .field input[type=number], .field select, .field textarea{
+  width:100%; background:var(--surface-2); border:1px solid var(--line); color:var(--text);
+  padding:10px 12px; border-radius:6px; font-family:var(--font-mono); font-size:0.86rem;
+}
+.field textarea{min-height:90px; resize:vertical;}
+.upload-zone{
+  border:1.5px dashed var(--line); border-radius:8px; padding:22px 14px; text-align:center;
+  cursor:pointer; margin-bottom:14px; transition:border-color .2s;
+}
+.upload-zone:hover{border-color:var(--amber);}
+.upload-zone .u-title{font-size:0.86rem; color:var(--text-dim); margin-bottom:4px;}
+.upload-zone .u-sub{font-size:0.74rem; color:var(--text-faint); font-family:var(--font-mono);}
+.row-2{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+.btn-run{
+  width:100%; background:var(--amber); color:#181205; font-weight:600; padding:12px; border-radius:6px;
+  border:none; cursor:pointer; font-family:var(--font-body); font-size:0.92rem; margin-top:6px;
+}
+.btn-run:hover{filter:brightness(1.08);}
+.btn-secondary{
+  width:100%; background:transparent; color:var(--text-dim); border:1px solid var(--line); padding:11px;
+  border-radius:6px; cursor:pointer; font-size:0.86rem; margin-top:8px;
+}
+.btn-secondary:hover{border-color:var(--text-faint); color:var(--text);}
+.results-empty{
+  display:flex; align-items:center; justify-content:center; min-height:340px; color:var(--text-faint);
+  font-family:var(--font-mono); font-size:0.86rem; text-align:center; border:1px dashed var(--line); border-radius:10px;
+}
+.metric-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:8px; overflow:hidden; margin-bottom:20px;}
+.metric{background:var(--bg); padding:16px;}
+.metric .m-label{font-size:0.7rem; color:var(--text-faint); font-family:var(--font-mono); text-transform:uppercase; margin-bottom:6px;}
+.metric .m-val{font-family:var(--font-mono); font-size:1.4rem; font-weight:600;}
+.metric .m-val.good{color:var(--teal);}
+.metric .m-val.bad{color:var(--red);}
+.metric .m-val.warn{color:var(--amber);}
+.verdict-box{
+  padding:16px 18px; border-radius:8px; margin-bottom:20px; font-size:0.9rem; display:flex; gap:12px; align-items:flex-start;
+}
+.verdict-box.good{background:rgba(63,191,168,0.09); border:1px solid rgba(63,191,168,0.3); color:#bfe9df;}
+.verdict-box.bad{background:rgba(229,83,61,0.09); border:1px solid rgba(229,83,61,0.3); color:#f2c3ba;}
+.results-chart-wrap{background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:18px; margin-bottom:16px;}
+table.data-table{width:100%; border-collapse:collapse; font-family:var(--font-mono); font-size:0.82rem;}
+table.data-table th, table.data-table td{padding:8px 10px; border-bottom:1px solid var(--line); text-align:left;}
+table.data-table th{color:var(--text-faint); font-weight:500; text-transform:uppercase; font-size:0.68rem; letter-spacing:0.04em;}
+table.data-table tr.oos td{color:var(--red);}
+
+/* Pricing */
+.pricing-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:20px;}
+@media(max-width:900px){.pricing-grid{grid-template-columns:1fr;}}
+.plan{background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:30px 26px; position:relative;}
+.plan.featured{border-color:var(--amber);}
+.plan.featured::before{content:'MOST CHOSEN'; position:absolute; top:-11px; left:26px; background:var(--amber); color:#181205; font-family:var(--font-mono); font-size:0.65rem; padding:3px 10px; border-radius:4px; letter-spacing:0.05em;}
+.plan .p-name{font-family:var(--font-display); font-weight:600; font-size:1.1rem; margin-bottom:6px;}
+.plan .p-for{font-size:0.8rem; color:var(--text-faint); margin-bottom:18px;}
+.plan .p-price{font-family:var(--font-mono); font-size:2rem; margin-bottom:2px;}
+.plan .p-price span{font-size:0.9rem; color:var(--text-faint); font-family:var(--font-body);}
+.plan .p-note{font-size:0.78rem; color:var(--text-faint); margin-bottom:22px;}
+.plan ul{list-style:none; margin-bottom:24px;}
+.plan li{font-size:0.86rem; color:var(--text-dim); padding:8px 0; border-top:1px solid var(--line); display:flex; gap:8px;}
+.plan li:first-child{border-top:none;}
+.plan li::before{content:'✓'; color:var(--teal); flex-shrink:0;}
+.plan .btn-ghost, .plan .btn-primary{display:block; text-align:center;}
+
+footer{border-top:1px solid var(--line); padding:44px 0; color:var(--text-faint); font-size:0.82rem;}
+footer .wrap{display:flex; justify-content:space-between; flex-wrap:wrap; gap:16px;}
+
+.toast{
+  position:fixed; bottom:24px; right:24px; background:var(--surface-2); border:1px solid var(--line);
+  padding:12px 18px; border-radius:8px; font-size:0.86rem; opacity:0; transform:translateY(10px);
+  transition:all .3s; z-index:200; pointer-events:none;
+}
+.toast.show{opacity:1; transform:translateY(0);}
+
+/* --- Accounts, paywall, sponsors --- */
+.nav-right{display:flex; align-items:center; gap:14px;}
+.acct-btn{background:none; border:1px solid var(--line); color:var(--text); font:500 0.85rem var(--font-body); padding:8px 14px; border-radius:6px; cursor:pointer;}
+.acct-btn:hover{border-color:var(--text-faint);}
+.acct-btn:focus-visible,.sp-x:focus-visible,.sp-in:focus-visible{outline:2px solid var(--amber); outline-offset:2px;}
+.sp-back{position:fixed; inset:0; background:rgba(8,10,14,.72); display:none; align-items:center; justify-content:center; z-index:200; padding:20px;}
+.sp-back.open{display:flex;}
+.sp-box{background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:28px; width:100%; max-width:420px; position:relative;}
+.sp-box h3{font-family:var(--font-display); font-size:1.25rem; margin-bottom:6px;}
+.sp-box p{color:var(--text-dim); font-size:0.88rem; margin-bottom:16px;}
+.sp-in{width:100%; background:var(--bg); border:1px solid var(--line); color:var(--text); padding:11px 12px; border-radius:6px; font:0.95rem var(--font-body); margin-bottom:12px;}
+.sp-box button.btn-primary,.sp-box button.btn-ghost{width:100%; cursor:pointer; margin-bottom:10px; font:inherit;}
+.sp-x{position:absolute; top:10px; right:12px; background:none; border:none; color:var(--text-faint); font-size:1.4rem; cursor:pointer;}
+.sp-row{display:flex; justify-content:space-between; align-items:baseline; border-top:1px solid var(--line); padding:10px 0; font-size:0.9rem;}
+.sp-row b{font-family:var(--font-mono); font-weight:500;}
+.pkr-strip{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:20px; margin-bottom:28px;}
+@media(max-width:900px){.pkr-strip{grid-template-columns:1fr;}}
+.pkr-strip .plan{border-color:var(--teal);}
+.sponsor{margin:40px auto 0; max-width:728px; text-align:center;}
+.sponsor small{display:block; color:var(--text-faint); font-size:0.72rem; margin-bottom:6px;}
+.sponsor img{max-width:100%; height:auto; border-radius:6px; border:1px solid var(--line);}
+.qc-lab{font-family:var(--font-mono);font-size:.74rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text-faint);margin:26px 0 10px;}
+.qc-read{background:var(--surface-2);border-left:3px solid var(--teal);padding:12px 16px;border-radius:6px;margin-top:14px;font-size:.9rem;color:var(--text-dim);}
+.qc-err{border-left-color:var(--red);}
+.qc-t{width:100%;border-collapse:collapse;margin:14px 0;font-size:.85rem;}
+.qc-t th,.qc-t td{border:1px solid var(--line);padding:7px 10px;text-align:left;}
+.qc-t th{background:var(--surface-2);color:var(--text-dim);font-family:var(--font-mono);font-weight:500;}
+#qcData{width:100%;min-height:130px;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:10px;font:0.82rem var(--font-mono);}
+.qc-bar{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0;}
+#qcOut .chart-panel{margin-top:16px;}
+.sp-box{max-height:92vh; overflow-y:auto;}
+.sp-qr{display:block; margin:6px auto 12px; width:220px; max-width:100%; border-radius:8px; background:#fff; padding:6px;}
+.sp-steps{margin:0 0 14px 18px; color:var(--text-dim); font-size:0.85rem; line-height:1.6;}
+.sp-agree{display:flex; gap:8px; align-items:flex-start; font-size:0.8rem; color:var(--text-dim); margin-bottom:12px;}
+.sp-agree a{color:var(--amber);}
+.legal-links a{margin-right:16px; color:var(--text-dim);}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <div class="brand">
+      <span class="brand-mark">
+        <svg viewBox="0 0 20 20" fill="none"><path d="M2 15 L7 8 L11 12 L18 3" stroke="#f2a93b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="2" y1="17" x2="18" y2="17" stroke="#3fbfa8" stroke-width="1.4" stroke-dasharray="1 2.4"/></svg>
+      </span>
+      SigmaPro
+    </div>
+    <div class="navlinks navlinks-mobile-hide">
+      <a href="#problem">Why SigmaPro</a>
+      <a href="#features">Modules</a>
+      <a href="#tool">Run Analysis</a>
+      <a href="#qctools">QC Toolkit</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#feedback">Feedback</a>
+    </div>
+    <div class="nav-right"><button id="acctBtn" class="acct-btn" onclick="SP.openAccount()">Log in</button><a href="#tool" class="nav-cta">Start Free Analysis</a></div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <div class="eyebrow">Live statistical engine — runs in your browser</div>
+      <h1 class="headline">One Black Belt.<br>Every SME's <span class="accent">math.</span></h1>
+      <p class="hero-sub">SigmaPro puts Capability Analysis, SPC, ANOVA and DOE directly in a Master Black Belt's hands — no MATLAB license, no data science team, no waiting on a subject matter expert to validate a formula. Upload data, get a defensible answer in seconds.</p>
+      <div class="hero-actions">
+        <a href="#tool" class="btn-primary">Run your first analysis →</a>
+        <a href="#problem" class="btn-ghost">Why manufacturers switch</a>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat"><b>4</b><span>DMAIC statistical modules</span></div>
+        <div class="hero-stat"><b>0</b><span>MATLAB seats required</span></div>
+        <div class="hero-stat"><b>&lt;10s</b><span>from CSV to Cpk</span></div>
+      </div>
+    </div>
+    <div class="chart-panel">
+      <div class="chart-panel-head">
+        <span class="title">I-MR CONTROL CHART — LIVE</span>
+        <span class="status-pill ok" id="heroStatusPill"><span class="dot"></span>IN CONTROL</span>
+      </div>
+      <canvas id="heroChart" height="140"></canvas>
+      <div class="chart-legend-row">
+        <span><b id="heroMean">—</b> centerline</span>
+        <span><b id="heroUcl">—</b> UCL</span>
+        <span><b id="heroLcl">—</b> LCL</span>
+        <span><b id="heroCpk">—</b> Cpk</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section id="problem">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="section-eyebrow">The staffing problem</div>
+      <h2 class="section-title">You don't have a MATLAB budget. You have a Black Belt shortage.</h2>
+      <p class="section-desc">The traditional build — MATLAB Production Server, a dedicated data science developer, a DevOps engineer just to keep it running — solves a problem plants don't actually have. The real bottleneck is headcount: too few certified statisticians for too many lines. SigmaPro removes the infrastructure and gives the calculation directly to the person who already knows what it means.</p>
+    </div>
+    <div class="problem-cards">
+      <div class="problem-card before">
+        <div class="label">Before</div>
+        <ul>
+          <li>Every DOE or ANOVA request queues behind your one or two Black Belts</li>
+          <li>A MATLAB Runtime + Production Server stack to license, host and patch</li>
+          <li>A data science developer just to package .m scripts into .ctf archives</li>
+          <li>Results arrive in a spreadsheet days after the line has already moved on</li>
+          <li>Formula validation is tribal knowledge, undocumented, one person deep</li>
+        </ul>
+      </div>
+      <div class="problem-card after">
+        <div class="label">With SigmaPro</div>
+        <ul>
+          <li>Any trained MBB runs Capability, SPC, ANOVA or DOE themselves, same shift</li>
+          <li>Runs entirely as static JavaScript — no MATLAB Runtime, no per-seat license</li>
+          <li>Deploys as a single site behind your existing SSL — no backend to operate</li>
+          <li>Answers in the seconds it takes to parse a CSV, not a ticket queue</li>
+          <li>Every formula is documented and versioned, auditable by any Black Belt</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="features">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="section-eyebrow">Four modules, one engine</div>
+      <h2 class="section-title">Everything your DMAIC toolkit needs, none of the infrastructure it usually costs</h2>
+    </div>
+    <div class="feat-grid">
+      <div class="feat-card" onclick="jumpToTool('capability')">
+        <div class="feat-num">01</div>
+        <h3>Process Capability</h3>
+        <p>Cp, Cpk, Pp, Ppk, sigma level and DPMO from a single measurement column and your spec limits.</p>
+      </div>
+      <div class="feat-card" onclick="jumpToTool('spc')">
+        <div class="feat-num">02</div>
+        <h3>SPC Charts</h3>
+        <p>I-MR for individuals, Xbar-R for subgrouped data, with control limits computed from standard constants.</p>
+      </div>
+      <div class="feat-card" onclick="jumpToTool('anova')">
+        <div class="feat-num">03</div>
+        <h3>ANOVA</h3>
+        <p>One-way analysis of variance across any number of groups, with F-statistic and p-value.</p>
+      </div>
+      <div class="feat-card" onclick="jumpToTool('doe')">
+        <div class="feat-num">04</div>
+        <h3>DOE</h3>
+        <p>Full-factorial design generator for 2–4 factors, with main-effect calculation once you enter responses.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="tool">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="section-eyebrow">Run it now</div>
+      <h2 class="section-title">Upload data. Get the analysis.</h2>
+      <p class="section-desc">Every calculation below runs in this browser tab — nothing is uploaded to a server. Paste or upload a CSV to get started.</p>
+    </div>
+
+    <div class="tabbar">
+      <button class="tabbtn active" data-tab="capability">Capability</button>
+      <button class="tabbtn" data-tab="spc">SPC</button>
+      <button class="tabbtn" data-tab="anova">ANOVA</button>
+      <button class="tabbtn" data-tab="doe">DOE</button>
+    </div>
+
+    <!-- CAPABILITY -->
+    <div class="tool-panel active" id="panel-capability">
+      <div class="tool-layout">
+        <div class="card">
+          <h4>Input</h4>
+          <div class="field">
+            <label>Data source</label>
+            <select id="capMode" onchange="toggleCapMode()">
+              <option value="raw">Individual measurements (ungrouped)</option>
+              <option value="subgrouped">Subgrouped measurements (for Cp/Cpk)</option>
+              <option value="summary">Summary statistics (n, mean, σ)</option>
+            </select>
+          </div>
+          <div id="capRawInputs">
+            <div class="upload-zone" onclick="document.getElementById('capFile').click()">
+              <div class="u-title">Upload CSV (one measurement column)</div>
+              <div class="u-sub" id="capFileName">.csv — or paste below</div>
+            </div>
+            <input type="file" id="capFile" accept=".csv" style="display:none">
+            <div class="field">
+              <label>Or paste values (comma / newline separated)</label>
+              <textarea id="capPaste" placeholder="3.60, 3.59, 3.61, 3.58 ...">3.601,3.588,3.597,3.594,3.602,3.591,3.588,3.599,3.603,3.597,3.591,3.601,3.602,3.595,3.590,3.591,3.598,3.604,3.599,3.593,3.596,3.600,3.592,3.594</textarea>
+            </div>
+            <div class="u-sub" style="margin-top:-6px; margin-bottom:14px;">Ungrouped data has no within-subgroup estimate, so this mode reports <b>Pp/Ppk</b> (overall performance) only — not Cp/Cpk.</div>
+          </div>
+          <div id="capSubInputs" style="display:none;">
+            <div class="field">
+              <label>Paste subgroups (one row per subgroup, comma-separated values within it)</label>
+              <textarea id="capSubPaste" placeholder="3.601,3.588,3.597&#10;3.594,3.602,3.591 ...">3.601,3.588,3.597
+3.594,3.602,3.591
+3.588,3.599,3.603
+3.597,3.591,3.601
+3.602,3.595,3.590
+3.591,3.598,3.604
+3.599,3.593,3.596
+3.596,3.600,3.592</textarea>
+            </div>
+            <div class="u-sub" style="margin-top:-6px; margin-bottom:14px;">Each row = one subgroup (e.g. one sampling instant). Computes Cp/Cpk from within-subgroup σ (R̄/d2) and Pp/Ppk from overall σ, side by side.</div>
+          </div>
+          <div id="capSummaryInputs" style="display:none;">
+            <div class="row-2">
+              <div class="field"><label>Sample size (n)</label><input type="number" id="capN" value="30" step="1"></div>
+              <div class="field"><label>Mean (μ)</label><input type="number" id="capMean" value="3.595" step="any"></div>
+            </div>
+            <div class="row-2">
+              <div class="field"><label>Std Dev (σ)</label><input type="number" id="capSigma" value="0.0289" step="any"></div>
+              <div class="field"><label>This σ is</label>
+                <select id="capSigmaType">
+                  <option value="overall">Overall (long-term) → Pp/Ppk</option>
+                  <option value="within">Within-subgroup (short-term) → Cp/Cpk</option>
+                </select>
+              </div>
+            </div>
+            <div class="u-sub" style="margin-top:-6px; margin-bottom:14px;">Pick the type that matches how σ was calculated — mixing the two up is the single most common capability-reporting error.</div>
+          </div>
+          <div class="row-2">
+            <div class="field"><label>LSL</label><input type="number" id="capLSL" value="3.40" step="any"></div>
+            <div class="field"><label>USL</label><input type="number" id="capUSL" value="3.70" step="any"></div>
+          </div>
+          <div class="field"><label>Target Cpk/Ppk to plan against</label><input type="number" id="capTargetCpk" value="1.33" step="0.01"></div>
+          <button class="btn-run" onclick="runCapability()">Run Capability Analysis</button>
+          <button class="btn-secondary" onclick="downloadReport('capability')">Download report</button>
+        </div>
+        <div id="capResults"><div class="results-empty">Run an analysis to see Cp/Cpk, Pp/Ppk, sigma level and DPMO here.</div></div>
+      </div>
+    </div>
+
+
+    <!-- SPC -->
+    <div class="tool-panel" id="panel-spc">
+      <div class="tool-layout">
+        <div class="card">
+          <h4>Input</h4>
+          <div class="upload-zone" onclick="document.getElementById('spcFile').click()">
+            <div class="u-title">Upload CSV</div>
+            <div class="u-sub" id="spcFileName">1 column = I-MR · 2+ columns = Xbar-R</div>
+          </div>
+          <input type="file" id="spcFile" accept=".csv" style="display:none">
+          <div class="field">
+            <label>Or paste rows (comma-separated per subgroup, one row per line)</label>
+            <textarea id="spcPaste" placeholder="12.01,12.03,11.99&#10;12.02,11.98,12.04 ...">12.01,12.03,11.99
+12.02,11.98,12.04
+12.05,12.01,12.00
+11.97,12.02,12.03
+12.08,12.04,12.06
+12.01,11.99,12.02
+12.03,12.05,12.01
+11.98,12.00,11.99
+12.06,12.03,12.07
+12.02,11.97,12.01</textarea>
+          </div>
+          <button class="btn-run" onclick="runSPC()">Generate Control Chart</button>
+          <button class="btn-secondary" onclick="downloadReport('spc')">Download report</button>
+        </div>
+        <div id="spcResults"><div class="results-empty">Run a chart to see centerline, UCL/LCL and out-of-control points here.</div></div>
+      </div>
+    </div>
+
+    <!-- ANOVA -->
+    <div class="tool-panel" id="panel-anova">
+      <div class="tool-layout">
+        <div class="card">
+          <h4>Input</h4>
+          <div class="upload-zone" onclick="document.getElementById('anovaFile').click()">
+            <div class="u-title">Upload CSV (one column per group, header = group name)</div>
+            <div class="u-sub" id="anovaFileName">.csv</div>
+          </div>
+          <input type="file" id="anovaFile" accept=".csv" style="display:none">
+          <div class="field">
+            <label>Or paste groups (header row, comma-separated columns)</label>
+            <textarea id="anovaPaste">Line A,Line B,Line C
+12.01,12.20,11.95
+12.03,12.15,11.99
+11.98,12.22,11.97
+12.05,12.18,12.01
+12.02,12.19,11.96
+11.99,12.21,12.00</textarea>
+          </div>
+          <button class="btn-run" onclick="runANOVA()">Run One-Way ANOVA</button>
+          <button class="btn-secondary" onclick="downloadReport('anova')">Download report</button>
+        </div>
+        <div id="anovaResults"><div class="results-empty">Run ANOVA to see the F-statistic, p-value and group comparison here.</div></div>
+      </div>
+    </div>
+
+    <!-- DOE -->
+    <div class="tool-panel" id="panel-doe">
+      <div class="tool-layout">
+        <div class="card">
+          <h4>Design setup</h4>
+          <div class="field">
+            <label>Number of factors</label>
+            <select id="doeFactorCount" onchange="renderDOEFactorInputs()">
+              <option value="2">2 factors (4 runs)</option>
+              <option value="3" selected>3 factors (8 runs)</option>
+              <option value="4">4 factors (16 runs)</option>
+            </select>
+          </div>
+          <div id="doeFactorInputs"></div>
+          <button class="btn-run" onclick="generateDOE()">Generate Design Matrix</button>
+        </div>
+        <div id="doeResults"><div class="results-empty">Generate a design, enter your run responses, then calculate effects.</div></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section id="qctools">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="section-eyebrow">QC toolkit</div>
+      <h2 class="section-title">The 7 QC tools and control charts, with templates.</h2>
+      <p class="section-desc">Not sure which chart fits your data? Answer a few questions. Then download the template (row 1 is an example), fill in your data and draw the chart in this browser tab.</p>
+    </div>
+    <div class="card" id="qcGuide"></div>
+    <div id="qcPick"></div>
+    <div id="qcPanel" class="card" style="margin-top:24px" hidden>
+      <h4 id="qcT"></h4>
+      <p id="qcU" class="section-desc" style="margin-bottom:8px"></p>
+      <p id="qcC" style="font-size:.85rem;color:var(--text-faint);margin-bottom:12px"></p>
+      <div class="qc-bar"><button class="btn-secondary" onclick="QC.tpl()">Download template (CSV)</button><button class="btn-secondary" onclick="QC.demo()">Load example</button><label class="btn-secondary" style="cursor:pointer">Upload CSV<input type="file" accept=".csv,text/csv" hidden onchange="QC.up(this)"></label></div>
+      <div class="field" id="qcEffW" hidden><label>Problem statement (the fish head)</label><input type="text" id="qcEff" value="Broken stitches"></div>
+      <textarea id="qcData" aria-label="Paste CSV data here"></textarea>
+      <div class="qc-bar"><button class="btn-run" onclick="QC.draw()">Draw chart</button></div>
+      <div id="qcOut"></div>
+    </div>
+  </div>
+</section>
+
+<section id="pricing">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="section-eyebrow">Pricing</div>
+      <h2 class="section-title">Priced against the SME headcount it replaces, not the infrastructure it doesn't need</h2>
+      <p class="section-desc">Every plan is a static web deployment — no MATLAB Runtime hosting, no per-core compute billing. You're paying for the engine and support, not servers.</p>
+    </div>
+    <div class="pkr-strip">
+      <div class="plan"><div class="p-name">Free trial</div><div class="p-for">Pakistan pricing (PKR)</div><div class="p-price">30<span> days free</span></div><div class="p-note">Sign up with your email. No card needed.</div><ul><li>All 4 modules</li><li>Formatted, watermarked reports</li></ul><button class="btn-primary" onclick="SP.openAccount()">Start 30-day free trial</button></div>
+      <div class="plan"><div class="p-name">Per report</div><div class="p-for">One file, one computer</div><div class="p-price">200<span> PKR / report</span></div><div class="p-note">Analysis on screen stays free.</div><ul><li>Buy one report at a time</li><li>Credits never expire</li></ul><button class="btn-ghost" onclick="SP.buy('credit1')">Buy 1 report</button></div>
+      <div class="plan"><div class="p-name">Monthly pass</div><div class="p-for">One person, one computer, 1 month</div><div class="p-price">1,000<span> PKR / month</span></div><div class="p-note">Cheaper than 5+ reports a month.</div><ul><li>Unlimited reports (fair use)</li><li>Renew when you need it</li></ul><button class="btn-primary" onclick="SP.buy('pass30')">Buy monthly pass</button></div>
+      <div class="plan"><div class="p-name">Yearly pass</div><div class="p-for">One person, one computer, 1 year</div><div class="p-price">10,000<span> PKR / year</span></div><div class="p-note">Two months free vs monthly.</div><ul><li>Unlimited reports (fair use)</li><li>One payment for the year</li></ul><button class="btn-primary" onclick="SP.buy('pass365')">Buy yearly pass</button></div>
+    </div>
+    <div class="pricing-grid">
+      <div class="plan">
+        <div class="p-name">Belt</div>
+        <div class="p-for">A single certified Black Belt validating their own line</div>
+        <div class="p-price">$49<span>/mo</span></div>
+        <div class="p-note">Billed annually, 1 seat</div>
+        <ul>
+          <li>All 4 modules — Capability, SPC, ANOVA, DOE</li>
+          <li>CSV upload, unlimited local analyses</li>
+          <li>Downloadable reports</li>
+        </ul>
+        <a href="#tool" class="btn-ghost">Start free</a>
+      </div>
+      <div class="plan featured">
+        <div class="p-name">Plant</div>
+        <div class="p-for">A quality team sharing one deployment across shifts</div>
+        <div class="p-price">$249<span>/mo</span></div>
+        <div class="p-note">Billed annually, up to 10 seats</div>
+        <ul>
+          <li>Everything in Belt</li>
+          <li>Shared design-matrix and report library</li>
+          <li>Branded report headers for audits</li>
+          <li>Priority formula-review support from an MBB</li>
+        </ul>
+        <a href="#tool" class="btn-primary">Start free</a>
+      </div>
+      <div class="plan">
+        <div class="p-name">Group</div>
+        <div class="p-for">Multi-site manufacturers standardizing across plants</div>
+        <div class="p-price">Custom</div>
+        <div class="p-note">Volume pricing, SSO, on-prem option</div>
+        <ul>
+          <li>Everything in Plant</li>
+          <li>Unlimited seats across sites</li>
+          <li>Custom control-limit constants and templates</li>
+          <li>Dedicated onboarding for your Black Belt network</li>
+        </ul>
+        <a href="#tool" class="btn-ghost">Talk to us</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="feedback">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="section-eyebrow">Your voice</div>
+      <h2 class="section-title">Feedback, suggestions and complaints.</h2>
+      <p class="section-desc">Tell us what works, what is missing, or what went wrong. Complaints need an email address so we can reply.</p>
+    </div>
+    <div class="card" id="fbForm" style="max-width:640px">
+      <div class="field"><label for="fbKind">Type</label><select id="fbKind"><option value="feedback">Feedback</option><option value="suggestion">Suggestion</option><option value="complaint">Complaint</option></select></div>
+      <div class="field"><label for="fbName">Name (optional)</label><input type="text" id="fbName" maxlength="80" autocomplete="name"></div>
+      <div class="field"><label for="fbEmail">Email (required for complaints)</label><input type="email" id="fbEmail" maxlength="120" autocomplete="email"></div>
+      <div class="field"><label for="fbRate">Rating (optional)</label><select id="fbRate"><option value="">No rating</option><option value="5">5 · Excellent</option><option value="4">4 · Good</option><option value="3">3 · Okay</option><option value="2">2 · Poor</option><option value="1">1 · Very poor</option></select></div>
+      <div class="field"><label for="fbMsg">Your message</label><textarea id="fbMsg" maxlength="2000" rows="5" style="width:100%;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:10px;font:0.95rem var(--font-body)"></textarea></div>
+      <input type="text" id="fbWeb" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px">
+      <button class="btn-primary" onclick="SP.fbSend()">Send</button>
+    </div>
+  </div>
+</section>
+
+<div class="wrap"><div id="sponsorSlot" class="sponsor" hidden></div></div>
+<footer>
+  <div class="wrap">
+    <div>SigmaPro — a statistical engine for Lean Six Sigma practitioners.</div>
+    <div>Analysis runs in your browser and your data files stay on your computer. Only the calculated report text is sent when you request a Word report, and it is not stored.</div>
+    <div class="legal-links"><a href="legal.html#terms">Terms</a><a href="legal.html#privacy">Privacy</a><a href="legal.html#refunds">Refund policy</a><a href="#feedback">Contact</a></div>
+  </div>
+</footer>
+
+<div class="sp-back" id="spBack" role="dialog" aria-modal="true" aria-labelledby="spTitle"><div class="sp-box"><button class="sp-x" aria-label="Close" onclick="SP.close()">&times;</button><div id="spBody"></div></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------- MATH CORE ---------- */
+function mean(a){return a.reduce((s,v)=>s+v,0)/a.length;}
+function stdevSample(a){const m=mean(a); return Math.sqrt(a.reduce((s,v)=>s+(v-m)**2,0)/(a.length-1));}
+function skewness(a){
+  const m=mean(a), s=stdevSample(a), n=a.length;
+  const num = a.reduce((sum,v)=>sum+((v-m)/s)**3,0)/n;
+  return num * Math.sqrt(n*(n-1))/(n-2); // sample-adjusted (Fisher-Pearson)
+}
+function excessKurtosis(a){
+  const m=mean(a), s=stdevSample(a), n=a.length;
+  const num = a.reduce((sum,v)=>sum+((v-m)/s)**4,0)/n;
+  return num - 3;
+}
+function normalPDF(x,m,s){ return Math.exp(-0.5*((x-m)/s)**2) / (s*Math.sqrt(2*Math.PI)); }
+function erf(x){
+  const sign = x<0?-1:1; x=Math.abs(x);
+  const a1=0.254829592,a2=-0.284496736,a3=1.421413741,a4=-1.453152027,a5=1.061405429,p=0.3275911;
+  const t=1/(1+p*x);
+  const y=1-(((((a5*t+a4)*t)+a3)*t+a2)*t+a1)*t*Math.exp(-x*x);
+  return sign*y;
+}
+function normalCDF(x, m, s){return 0.5*(1+erf((x-m)/(s*Math.sqrt(2))));}
+
+const XBAR_CONST = { // n: [A2, D3, D4]
+  2:[1.880,0,3.267], 3:[1.023,0,2.574], 4:[0.729,0,2.282], 5:[0.577,0,2.114],
+  6:[0.483,0,2.004], 7:[0.419,0.076,1.924], 8:[0.373,0.136,1.864], 9:[0.337,0.184,1.816], 10:[0.308,0.223,1.777]
+};
+const D2_CONST = { // n: d2 (bias-correction for R-bar -> sigma_within)
+  2:1.128, 3:1.693, 4:2.059, 5:2.326, 6:2.534, 7:2.704, 8:2.847, 9:2.970, 10:3.078
+};
+
+function toast(msg){
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2400);
+}
+
+function parseNumbers(text){
+  return text.split(/[\n,]+/).map(s=>s.trim()).filter(s=>s.length).map(Number).filter(n=>!isNaN(n));
+}
+
+/* ---------- TABS ---------- */
+document.querySelectorAll('.tabbtn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tabbtn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tool-panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-'+btn.dataset.tab).classList.add('active');
+  });
+});
+function jumpToTool(tab){
+  document.querySelector('.tabbtn[data-tab="'+tab+'"]').click();
+  document.getElementById('tool').scrollIntoView({behavior:'smooth'});
+}
+
+/* ---------- HERO LIVE CHART ---------- */
+let heroData = [12.01,12.03,11.98,12.05,12.02,11.99,12.04,12.00,11.97,12.06,12.03,11.95];
+let heroChart;
+function heroStats(){
+  const m = mean(heroData);
+  const mr=[]; for(let i=1;i<heroData.length;i++) mr.push(Math.abs(heroData[i]-heroData[i-1]));
+  const mrbar = mean(mr);
+  const ucl = m+2.66*mrbar, lcl = m-2.66*mrbar;
+  return {m,ucl,lcl};
+}
+function initHeroChart(){
+  const ctx = document.getElementById('heroChart');
+  const {m,ucl,lcl} = heroStats();
+  heroChart = new Chart(ctx, {
+    type:'line',
+    data:{
+      labels: heroData.map((_,i)=>i+1),
+      datasets:[
+        {label:'Value', data:heroData, borderColor:'#f2a93b', backgroundColor:'#f2a93b', pointRadius:3, tension:0.15, borderWidth:2},
+        {label:'CL', data:heroData.map(()=>m), borderColor:'#5c6577', borderDash:[4,4], pointRadius:0, borderWidth:1},
+        {label:'UCL', data:heroData.map(()=>ucl), borderColor:'#e5533d', pointRadius:0, borderWidth:1},
+        {label:'LCL', data:heroData.map(()=>lcl), borderColor:'#e5533d', pointRadius:0, borderWidth:1},
+      ]
+    },
+    options:{
+      responsive:true, animation:{duration:400},
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{display:false},
+        y:{grid:{color:'#2a3140'}, ticks:{color:'#5c6577', font:{family:'JetBrains Mono', size:9}}}
+      }
+    }
+  });
+  updateHeroReadout();
+}
+function updateHeroReadout(){
+  const {m,ucl,lcl} = heroStats();
+  document.getElementById('heroMean').textContent = m.toFixed(3);
+  document.getElementById('heroUcl').textContent = ucl.toFixed(3);
+  document.getElementById('heroLcl').textContent = lcl.toFixed(3);
+  const s = stdevSample(heroData);
+  const cpk = Math.min((12.10-m)/(3*s), (m-11.90)/(3*s));
+  document.getElementById('heroCpk').textContent = cpk.toFixed(2);
+  const last = heroData[heroData.length-1];
+  const pill = document.getElementById('heroStatusPill');
+  const oos = last>ucl || last<lcl;
+  pill.className = 'status-pill '+(oos?'alert':'ok');
+  pill.innerHTML = '<span class="dot"></span>'+(oos?'OUT OF CONTROL':'IN CONTROL');
+}
+setInterval(()=>{
+  if(!heroChart) return;
+  const m = mean(heroData);
+  const s = stdevSample(heroData);
+  let next = m + (Math.random()-0.5)*s*3.4;
+  heroData.push(Number(next.toFixed(3)));
+  if(heroData.length>14) heroData.shift();
+  const {m:m2,ucl,lcl} = heroStats();
+  heroChart.data.labels = heroData.map((_,i)=>i+1);
+  heroChart.data.datasets[0].data = heroData;
+  heroChart.data.datasets[1].data = heroData.map(()=>m2);
+  heroChart.data.datasets[2].data = heroData.map(()=>ucl);
+  heroChart.data.datasets[3].data = heroData.map(()=>lcl);
+  heroChart.update();
+  updateHeroReadout();
+}, 2600);
+window.addEventListener('DOMContentLoaded', initHeroChart);
+
+/* ---------- CAPABILITY ---------- */
+document.getElementById('capFile').addEventListener('change', function(e){
+  const f = e.target.files[0]; if(!f) return;
+  document.getElementById('capFileName').textContent = f.name;
+  Papa.parse(f, {complete: r=>{
+    const vals = r.data.flat().map(Number).filter(n=>!isNaN(n));
+    document.getElementById('capPaste').value = vals.join(', ');
+  }});
+});
+let lastCapReport = '';
+function toggleCapMode(){
+  const mode = document.getElementById('capMode').value;
+  document.getElementById('capRawInputs').style.display = mode==='raw' ? 'block':'none';
+  document.getElementById('capSubInputs').style.display = mode==='subgrouped' ? 'block':'none';
+  document.getElementById('capSummaryInputs').style.display = mode==='summary' ? 'block':'none';
+}
+function runCapability(){
+  const mode = document.getElementById('capMode').value;
+  const lsl = parseFloat(document.getElementById('capLSL').value);
+  const usl = parseFloat(document.getElementById('capUSL').value);
+
+  let data=null, overallM=null, overallS=null, n=null;   // for Pp/Ppk (overall/long-term)
+  let withinS=null, rbar=null, subgroupN=null;           // for Cp/Cpk (within-subgroup/short-term)
+
+  if(mode==='summary'){
+    n = parseInt(document.getElementById('capN').value);
+    const m = parseFloat(document.getElementById('capMean').value);
+    const s = parseFloat(document.getElementById('capSigma').value);
+    const sigmaType = document.getElementById('capSigmaType').value;
+    if(!n || isNaN(m) || isNaN(s) || s<=0){ toast('Enter valid n, mean and σ'); return; }
+    overallM = m;
+    if(sigmaType==='overall'){ overallS = s; }
+    else { withinS = s; overallM = m; overallS = null; }
+  } else if(mode==='subgrouped'){
+    const lines = document.getElementById('capSubPaste').value.trim().split('\n').filter(l=>l.trim());
+    const rows = lines.map(l=>l.split(',').map(Number).filter(x=>!isNaN(x)));
+    if(rows.length<2 || rows[0].length<2){ toast('Need at least 2 subgroups of 2+ values each'); return; }
+    subgroupN = rows[0].length;
+    const allVals = rows.flat();
+    n = allVals.length;
+    overallM = mean(allVals); overallS = stdevSample(allVals);
+    const ranges = rows.map(r=>Math.max(...r)-Math.min(...r));
+    rbar = mean(ranges);
+    const d2 = D2_CONST[Math.min(subgroupN,10)] || D2_CONST[10];
+    withinS = rbar/d2;
+    data = allVals;
+  } else { // raw, ungrouped
+    data = parseNumbers(document.getElementById('capPaste').value);
+    if(data.length<2){ toast('Need at least 2 data points'); return; }
+    overallM = mean(data); overallS = stdevSample(data); n = data.length;
+  }
+
+  const cls = v => v>=1.33?'good': v>=1.0?'warn':'bad';
+  let pp=null, ppk=null, ppu=null, ppl=null, cp=null, cpk=null, cpu=null, cpl=null;
+  if(overallS!==null){
+    pp = (usl-lsl)/(6*overallS);
+    ppu = (usl-overallM)/(3*overallS); ppl = (overallM-lsl)/(3*overallS);
+    ppk = Math.min(ppu,ppl);
+  }
+  if(withinS!==null){
+    cp = (usl-lsl)/(6*withinS);
+    cpu = (usl-overallM)/(3*withinS); cpl = (overallM-lsl)/(3*withinS);
+    cpk = Math.min(cpu,cpl);
+  }
+  // Sigma level / DPMO always reflect ACTUAL output, so they use overall sigma (Ppk) when available.
+  let sigmaZ=null, dpmo=null;
+  if(overallS!==null){
+    sigmaZ = 3*ppk;
+    dpmo = Math.max(0, ((1-normalCDF(usl,overallM,overallS)) + normalCDF(lsl,overallM,overallS)) * 1e6);
+  } else if(withinS!==null){
+    sigmaZ = 3*cpk; // potential-only estimate, no real output data to compute actual DPMO
+  }
+  const primaryK = ppk!==null?ppk:cpk;
+  const primarySigma = overallS!==null?overallS:withinS;
+  const targetCpk = parseFloat(document.getElementById('capTargetCpk').value) || 1.33;
+  const capable = primaryK>=targetCpk;
+  const clsT = v => v>=targetCpk?'good': v>=1.0?'warn':'bad';
+
+  // --- Capability Target Planner ---
+  // (1) Max sigma allowed if the mean sat exactly on target, for Cpk/Ppk to hit targetCpk
+  const specTarget = (usl+lsl)/2, halfSpec = (usl-lsl)/2;
+  const maxSigmaCentered = halfSpec/(3*targetCpk);
+  // (2) Allowable mean band at the CURRENT sigma, for Cpk/Ppk to hit targetCpk
+  const req = 3*primarySigma*targetCpk;
+  const bandAchievable = req <= halfSpec;
+  const bandLow = bandAchievable ? lsl+req : null;
+  const bandHigh = bandAchievable ? usl-req : null;
+  const meanInBand = bandAchievable && overallM>=bandLow && overallM<=bandHigh;
+
+  let metricRows = '';
+  if(pp!==null){
+    metricRows += `<div class="metric"><div class="m-label">Pp</div><div class="m-val ${clsT(pp)}">${pp.toFixed(2)}</div></div>
+      <div class="metric"><div class="m-label">Ppk</div><div class="m-val ${clsT(ppk)}">${ppk.toFixed(2)}</div></div>`;
+  }
+  if(cp!==null){
+    metricRows += `<div class="metric"><div class="m-label">Cp</div><div class="m-val ${clsT(cp)}">${cp.toFixed(2)}</div></div>
+      <div class="metric"><div class="m-label">Cpk</div><div class="m-val ${clsT(cpk)}">${cpk.toFixed(2)}</div></div>`;
+  }
+  const html = `
+    <div class="metric-grid">
+      <div class="metric"><div class="m-label">Mean</div><div class="m-val">${overallM.toFixed(4)}</div></div>
+      <div class="metric"><div class="m-label">σ overall</div><div class="m-val">${overallS!==null?overallS.toFixed(4):'n/a'}</div></div>
+      ${withinS!==null?`<div class="metric"><div class="m-label">σ within</div><div class="m-val">${withinS.toFixed(4)}</div></div>`:''}
+      ${metricRows}
+      <div class="metric"><div class="m-label">Process Sigma (Z)</div><div class="m-val">${sigmaZ!==null?sigmaZ.toFixed(2)+'σ':'n/a'}</div></div>
+      <div class="metric"><div class="m-label">Actual DPMO</div><div class="m-val">${dpmo!==null?dpmo.toFixed(0):'n/a (no overall σ)'}</div></div>
+    </div>
+    <div class="verdict-box ${capable?'good':'bad'}">
+      <div>${capable? '✓' : '⚠'}</div>
+      <div><b>${capable? 'Process is capable/performing' : 'Process is not capable/performing'}</b><br>
+      ${ppk!==null?`Ppk = ${ppk.toFixed(2)} (overall performance) `:''}${cpk!==null?`Cpk = ${cpk.toFixed(2)} (potential capability) `:''}${(primaryK)>=targetCpk?'meets':'is below'} your target of ${targetCpk.toFixed(2)}.
+      ${overallS===null?' Cp/Cpk shown here is a potential-capability estimate only — no overall/long-term data was supplied, so no actual defect rate (DPMO) can be reported.':''}</div>
+    </div>
+    <div class="card" style="margin-bottom:16px;">
+      <h4>Capability Target Planner (for Cpk/Ppk ≥ ${targetCpk.toFixed(2)})</h4>
+      <table class="data-table">
+        <tr><td>Spec target (center)</td><td>${specTarget.toFixed(4)}</td></tr>
+        <tr><td>Max σ allowed <i>if mean is exactly on target</i></td><td>${maxSigmaCentered.toFixed(4)}</td></tr>
+        <tr><td>Allowable mean range <i>at current σ = ${primarySigma.toFixed(4)}</i></td>
+            <td>${bandAchievable? bandLow.toFixed(4)+' – '+bandHigh.toFixed(4) : 'Not achievable — current σ alone exceeds the spec width needed for Cpk ≥ '+targetCpk.toFixed(2)+' even perfectly centered. Reduce variation first.'}</td></tr>
+        ${bandAchievable?`<tr><td>Current mean vs. that range</td><td class="${meanInBand?'':''}" style="color:${meanInBand?'#3fbfa8':'#e5533d'}">${meanInBand? 'Within range ✓' : 'Outside range — recentering needed'}</td></tr>`:''}
+      </table>
+      <div class="u-sub" style="margin-top:12px; line-height:1.5;">Two independent levers to hit the target: (1) recenter the mean into the allowable range above at the current σ, or (2) reduce σ to at most ${maxSigmaCentered.toFixed(4)} if you also bring the mean to target. Standard sequence (Mitra; Kume): fix centering first since it's usually a calibration/offset fix, then address variation reduction (MSA/Gauge R&R, material and setup control) only if σ itself is the limiting factor.</div>
+    </div>
+    <div class="u-sub" style="margin-bottom:16px;">Process Sigma (Z) = 3×Ppk, unshifted. Some reports add the industry-convention +1.5σ long-term shift on top of this (giving ${sigmaZ!==null?(sigmaZ+1.5).toFixed(2):'n/a'}σ here) — that shifted figure is a benchmarking convention, not a second independent measurement, so it's shown separately rather than baked into "Sigma Level" silently.</div>
+    ${data ? '<div class="results-chart-wrap"><canvas id="capHist" height="90"></canvas></div><div class="u-sub" id="normalityNote" style="margin-bottom:16px; line-height:1.5;"></div>' : ''}
+  `;
+  document.getElementById('capResults').innerHTML = html;
+  if(data) drawHistogram(data, lsl, usl, overallM, overallS || withinS);
+  lastCapReport = `SigmaPro — Process Capability Report
+Generated: ${new Date().toLocaleString()}
+
+n = ${n}
+Mean = ${overallM.toFixed(4)}
+${overallS!==null?`Overall Std Dev (long-term) = ${overallS.toFixed(4)}`:''}
+${withinS!==null?`Within-subgroup Std Dev (short-term, R-bar/d2${subgroupN?', n='+subgroupN:''}) = ${withinS.toFixed(4)}`:''}
+LSL = ${lsl}, USL = ${usl}
+
+${pp!==null?`Pp  = ${pp.toFixed(3)}\nPpk = ${ppk.toFixed(3)}  (PPU=${ppu.toFixed(3)}, PPL=${ppl.toFixed(3)})`:''}
+${cp!==null?`Cp  = ${cp.toFixed(3)}\nCpk = ${cpk.toFixed(3)}  (CPU=${cpu.toFixed(3)}, CPL=${cpl.toFixed(3)})`:''}
+
+Process Sigma (Z, unshifted) = ${sigmaZ!==null?sigmaZ.toFixed(2):'n/a'}
+Long-term benchmarking sigma (+1.5σ shift convention) = ${sigmaZ!==null?(sigmaZ+1.5).toFixed(2):'n/a'}
+Actual DPMO = ${dpmo!==null?dpmo.toFixed(0):'n/a — no overall/long-term data supplied'}
+
+Capability Target Planner (target Cpk/Ppk = ${targetCpk.toFixed(2)}):
+  Spec target (center) = ${specTarget.toFixed(4)}
+  Max sigma allowed if mean is exactly on target = ${maxSigmaCentered.toFixed(4)}
+  Allowable mean range at current sigma (${primarySigma.toFixed(4)}) = ${bandAchievable? bandLow.toFixed(4)+' to '+bandHigh.toFixed(4) : 'not achievable at this sigma even centered — reduce variation first'}
+
+Verdict: ${capable? 'Process meets the target of '+targetCpk.toFixed(2) : 'Process does NOT meet the target of '+targetCpk.toFixed(2)}
+`;
+}
+
+function drawHistogram(data, lsl, usl, m, s){
+  const ctx = document.getElementById('capHist');
+  const binCount = 12;
+  const min = Math.min(...data, lsl), max = Math.max(...data, usl);
+  const w = (max-min)/binCount;
+  const bins = new Array(binCount).fill(0);
+  data.forEach(v=>{ let idx = Math.floor((v-min)/w); if(idx>=binCount) idx=binCount-1; if(idx<0) idx=0; bins[idx]++; });
+  const binCenters = bins.map((_,i)=> min + (i+0.5)*w);
+  const labels = bins.map((_,i)=>(min+i*w).toFixed(3));
+  const barColors = binCenters.map(c => (c<lsl || c>usl) ? '#e5533d88' : '#f2a93b88');
+  const barBorders = binCenters.map(c => (c<lsl || c>usl) ? '#e5533d' : '#f2a93b');
+  // Theoretical normal curve, scaled to the same expected-count axis as the bars
+  const normalCounts = binCenters.map(c => normalPDF(c, m, s) * data.length * w);
+
+  new Chart(ctx, {
+    data:{
+      labels,
+      datasets:[
+        {type:'bar', label:'Observed frequency', data:bins, backgroundColor:barColors, borderColor:barBorders, borderWidth:1, order:2},
+        {type:'line', label:'Normal curve (fitted to μ, σ)', data:normalCounts, borderColor:'#3fbfa8', backgroundColor:'#3fbfa8', pointRadius:0, borderWidth:2, tension:0.35, order:1}
+      ]
+    },
+    options:{
+      plugins:{legend:{labels:{color:'#909aab', font:{family:'JetBrains Mono', size:9}}}},
+      scales:{
+        x:{ticks:{color:'#5c6577', font:{family:'JetBrains Mono', size:9}}, grid:{display:false}},
+        y:{ticks:{color:'#5c6577', font:{family:'JetBrains Mono', size:9}}, grid:{color:'#2a3140'}}
+      }
+    }
+  });
+
+  // Normality diagnostic — Cp/Cpk/DPMO all assume this holds
+  const skew = skewness(data), kurt = excessKurtosis(data);
+  const flagged = Math.abs(skew) > 1 || Math.abs(kurt) > 1;
+  const el = document.getElementById('normalityNote');
+  if(el){
+    el.innerHTML = flagged
+      ? `⚠ <b>Normality check:</b> skewness = ${skew.toFixed(2)}, excess kurtosis = ${kurt.toFixed(2)} — the data departs noticeably from normal (rule of thumb: flag if |skew| or |kurtosis| > 1). Cp/Cpk/Ppk and the DPMO estimate above all assume a normal distribution — with this much departure, treat those numbers as approximate. Consider a normal probability plot, a larger sample, or a non-normal capability method (e.g. Box-Cox transform, or the percentile/Clements method) before reporting this externally.`
+      : `✓ <b>Normality check:</b> skewness = ${skew.toFixed(2)}, excess kurtosis = ${kurt.toFixed(2)} — close enough to normal (|skew|, |kurtosis| ≤ 1) that the Cp/Cpk/Ppk formulas above are on reasonably solid ground.`;
+  }
+}
+
+/* ---------- SPC ---------- */
+document.getElementById('spcFile').addEventListener('change', function(e){
+  const f = e.target.files[0]; if(!f) return;
+  document.getElementById('spcFileName').textContent = f.name;
+  Papa.parse(f, {complete: r=>{
+    const rows = r.data.filter(row=>row.some(c=>c!==''));
+    document.getElementById('spcPaste').value = rows.map(row=>row.filter(c=>c!=='').join(',')).join('\n');
+  }});
+});
+let lastSpcReport = '';
+function runSPC(){
+  const lines = document.getElementById('spcPaste').value.trim().split('\n').filter(l=>l.trim());
+  const rows = lines.map(l=>l.split(',').map(Number).filter(n=>!isNaN(n)));
+  if(rows.length<3){ toast('Need at least 3 rows'); return; }
+  const subgroupSize = rows[0].length;
+
+  if(subgroupSize<=1){
+    const data = rows.map(r=>r[0]);
+    const m = mean(data);
+    const mr=[]; for(let i=1;i<data.length;i++) mr.push(Math.abs(data[i]-data[i-1]));
+    const mrbar = mean(mr);
+    const ucl = m+2.66*mrbar, lcl = m-2.66*mrbar;
+    const uclMR = 3.267*mrbar, lclMR = 0; // D4=3.267, D3=0 for n=2 moving range
+    const oosPoints = data.map((v,i)=>({i,v,oos: v>ucl||v<lcl})).filter(p=>p.oos);
+    const oosMR = mr.map((v,i)=>({i:i+1,v,oos: v>uclMR})).filter(p=>p.oos);
+    const secondary = {label:'Moving Range', series: mr, cl: mrbar, ucl: uclMR, lcl: lclMR, oosPoints: oosMR};
+    renderSPCResult('I Chart (Individuals)', data, m, ucl, lcl, oosPoints, data.length, secondary);
+    lastSpcReport = spcReportText('I-MR', m, ucl, lcl, oosPoints, data.length, {label:'MR', cl:mrbar, ucl:uclMR, oos:oosMR});
+  } else {
+    const n = subgroupSize;
+    const consts = XBAR_CONST[Math.min(n,10)] || XBAR_CONST[10];
+    const xbars = rows.map(r=>mean(r));
+    const ranges = rows.map(r=>Math.max(...r)-Math.min(...r));
+    const xbarbar = mean(xbars), rbar = mean(ranges);
+    const [A2,D3,D4] = consts;
+    const uclX = xbarbar + A2*rbar, lclX = xbarbar - A2*rbar;
+    const uclR = D4*rbar, lclR = D3*rbar;
+    const oosPoints = xbars.map((v,i)=>({i,v,oos: v>uclX||v<lclX})).filter(p=>p.oos);
+    const oosR = ranges.map((v,i)=>({i,v,oos: v>uclR||v<lclR})).filter(p=>p.oos);
+    const secondary = {label:'Range (R)', series: ranges, cl: rbar, ucl: uclR, lcl: lclR, oosPoints: oosR};
+    renderSPCResult(`X̄ Chart (n=${n} subgroups)`, xbars, xbarbar, uclX, lclX, oosPoints, xbars.length, secondary);
+    lastSpcReport = spcReportText(`Xbar-R (n=${n})`, xbarbar, uclX, lclX, oosPoints, xbars.length, {label:'R', cl:rbar, ucl:uclR, oos:oosR});
+  }
+}
+function spcReportText(kind, cl, ucl, lcl, oos, n, secondary){
+  return `SigmaPro — SPC Report (${kind})
+Generated: ${new Date().toLocaleString()}
+
+Subgroups/points: ${n}
+Centerline = ${cl.toFixed(4)}
+UCL = ${ucl.toFixed(4)}
+LCL = ${lcl.toFixed(4)}
+
+Out-of-control points (primary chart): ${oos.length}
+${oos.map(p=>`  Point ${p.i+1}: ${p.v.toFixed(4)}`).join('\n') || '  None'}
+
+${secondary?`${secondary.label} chart — centerline=${secondary.cl.toFixed(4)}, UCL=${secondary.ucl.toFixed(4)}
+${secondary.label} out-of-control points: ${secondary.oos.length}
+${secondary.oos.map(p=>`  Point ${p.i+1}: ${p.v.toFixed(4)}`).join('\n') || '  None'}
+Note: the ${secondary.label} chart must be in control before the primary chart's limits can be trusted — a wide/out-of-control range signals unstable within-subgroup variation.`:''}
+
+Verdict: ${oos.length===0 && (!secondary || secondary.oos.length===0)? 'Process is in statistical control.' : 'Process shows special-cause variation — investigate flagged points.'}
+`;
+}
+function renderSPCResult(title, series, cl, ucl, lcl, oosPoints, n, secondary){
+  const inControl = oosPoints.length===0;
+  const secInControl = !secondary || secondary.oosPoints.length===0;
+  const overallOk = inControl && secInControl;
+  document.getElementById('spcResults').innerHTML = `
+    <div class="metric-grid">
+      <div class="metric"><div class="m-label">Centerline</div><div class="m-val">${cl.toFixed(4)}</div></div>
+      <div class="metric"><div class="m-label">UCL</div><div class="m-val">${ucl.toFixed(4)}</div></div>
+      <div class="metric"><div class="m-label">LCL</div><div class="m-val">${lcl.toFixed(4)}</div></div>
+      <div class="metric"><div class="m-label">Out of control</div><div class="m-val ${inControl?'good':'bad'}">${oosPoints.length}</div></div>
+    </div>
+    <div class="verdict-box ${overallOk?'good':'bad'}">
+      <div>${overallOk?'✓':'⚠'}</div>
+      <div><b>${overallOk? 'Process is in statistical control' : 'Out-of-control signal detected'}</b><br>
+      ${inControl? 'No points on the primary chart fall outside its control limits. ' : 'Point(s) '+oosPoints.map(p=>p.i+1).join(', ')+' exceed the primary chart limits. '}
+      ${secondary? (secInControl? `The ${secondary.label} chart is also in control, so these limits are trustworthy.` : `The ${secondary.label} chart shows ${secondary.oosPoints.length} out-of-control point(s) — within-subgroup variation is unstable, so the primary chart's limits should be treated with caution until that's resolved.`) : ''}</div>
+    </div>
+    <div class="results-chart-wrap"><canvas id="spcChartCanvas" height="100"></canvas></div>
+    ${secondary? '<div class="results-chart-wrap"><canvas id="spcSecondaryCanvas" height="90"></canvas></div>' : ''}
+  `;
+  const ctx = document.getElementById('spcChartCanvas');
+  new Chart(ctx, {
+    type:'line',
+    data:{
+      labels: series.map((_,i)=>i+1),
+      datasets:[
+        {label:title, data:series, borderColor:'#f2a93b', pointBackgroundColor: series.map((v,i)=> (v>ucl||v<lcl)?'#e5533d':'#f2a93b'), pointRadius:4, borderWidth:2, tension:0.1},
+        {label:'CL', data:series.map(()=>cl), borderColor:'#5c6577', borderDash:[4,4], pointRadius:0, borderWidth:1},
+        {label:'UCL', data:series.map(()=>ucl), borderColor:'#e5533d', pointRadius:0, borderWidth:1},
+        {label:'LCL', data:series.map(()=>lcl), borderColor:'#e5533d', pointRadius:0, borderWidth:1},
+      ]
+    },
+    options:{
+      plugins:{legend:{labels:{color:'#909aab', font:{family:'JetBrains Mono', size:10}}}},
+      scales:{
+        x:{ticks:{color:'#5c6577', font:{family:'JetBrains Mono', size:9}}, grid:{color:'#2a3140'}},
+        y:{ticks:{color:'#5c6577', font:{family:'JetBrains Mono', size:9}}, grid:{color:'#2a3140'}}
+      }
+    }
+  });
+  if(secondary){
+    const ctx2 = document.getElementById('spcSecondaryCanvas');
+    new Chart(ctx2, {
+      type:'line',
+      data:{
+        labels: secondary.series.map((_,i)=>i+1),
+        datasets:[
+          {label:secondary.label, data:secondary.series, borderColor:'#3fbfa8', pointBackgroundColor: secondary.series.map(v=>(v>secondary.ucl||v<secondary.lcl)?'#e5533d':'#3fbfa8'), pointRadius:4, borderWidth:2, tension:0.1},
+          {label:'CL', data:secondary.series.map(()=>secondary.cl), borderColor:'#5c6577', borderDash:[4,4], pointRadius:0, borderWidth:1},
+          {label:'UCL', data:secondary.series.map(()=>secondary.ucl), borderColor:'#e5533d', pointRadius:0, borderWidth:1},
+          {label:'LCL', data:secondary.series.map(()=>secondary.lcl), borderColor:'#e5533d', pointRadius:0, borderWidth:1},
+        ]
+      },
+      options:{
+        plugins:{legend:{labels:{color:'#909aab', font:{family:'JetBrains Mono', size:10}}}},
+        scales:{
+          x:{ticks:{color:'#5c6577', font:{family:'JetBrains Mono', size:9}}, grid:{color:'#2a3140'}},
+          y:{ticks:{color:'#5c6577', font:{family:'JetBrains Mono', size:9}}, grid:{color:'#2a3140'}}
+        }
+      }
+    });
+  }
+}
+
+
+/* ---------- ANOVA ---------- */
+document.getElementById('anovaFile').addEventListener('change', function(e){
+  const f = e.target.files[0]; if(!f) return;
+  document.getElementById('anovaFileName').textContent = f.name;
+  Papa.parse(f, {complete: r=>{
+    const rows = r.data.filter(row=>row.some(c=>c!==''));
+    document.getElementById('anovaPaste').value = rows.map(row=>row.join(',')).join('\n');
+  }});
+});
+let lastAnovaReport = '';
+function runANOVA(){
+  const lines = document.getElementById('anovaPaste').value.trim().split('\n').filter(l=>l.trim());
+  const headers = lines[0].split(',').map(s=>s.trim());
+  const groups = headers.map(()=>[]);
+  for(let i=1;i<lines.length;i++){
+    const cells = lines[i].split(',');
+    cells.forEach((c,gi)=>{ const v=Number(c); if(!isNaN(v) && c.trim()!=='') groups[gi].push(v); });
+  }
+  if(groups.some(g=>g.length<2)){ toast('Each group needs at least 2 values'); return; }
+  const allVals = groups.flat();
+  const grandMean = mean(allVals);
+  const k = groups.length, N = allVals.length;
+  const ssb = groups.reduce((s,g)=> s + g.length*(mean(g)-grandMean)**2, 0);
+  const ssw = groups.reduce((s,g)=>{ const gm=mean(g); return s + g.reduce((s2,v)=>s2+(v-gm)**2,0); }, 0);
+  const dfB = k-1, dfW = N-k;
+  const msb = ssb/dfB, msw = ssw/dfW;
+  const F = msb/msw;
+  let p;
+  try{ p = 1 - jStat.centralF.cdf(F, dfB, dfW); } catch(e){ p = NaN; }
+  const significant = p<0.05;
+
+  const rowsHtml = groups.map((g,i)=>`<tr><td>${headers[i]}</td><td>${g.length}</td><td>${mean(g).toFixed(4)}</td><td>${stdevSample(g).toFixed(4)}</td></tr>`).join('');
+  document.getElementById('anovaResults').innerHTML = `
+    <div class="metric-grid">
+      <div class="metric"><div class="m-label">F-statistic</div><div class="m-val">${F.toFixed(3)}</div></div>
+      <div class="metric"><div class="m-label">p-value</div><div class="m-val ${significant?'bad':'good'}">${isNaN(p)?'—':p.toFixed(4)}</div></div>
+      <div class="metric"><div class="m-label">df (between)</div><div class="m-val">${dfB}</div></div>
+      <div class="metric"><div class="m-label">df (within)</div><div class="m-val">${dfW}</div></div>
+    </div>
+    <div class="verdict-box ${significant?'bad':'good'}">
+      <div>${significant?'⚠':'✓'}</div>
+      <div><b>${significant? 'Groups differ significantly (p < 0.05)' : 'No significant difference between groups (p ≥ 0.05)'}</b><br>
+      ${significant? 'At least one group mean differs from the others — worth a follow-up pairwise comparison.' : 'Observed differences between group means are consistent with random variation.'}</div>
+    </div>
+    <table class="data-table">
+      <thead><tr><th>Group</th><th>n</th><th>Mean</th><th>Std Dev</th></tr></thead>
+      <tbody>${rowsHtml}</tbody>
+    </table>
+    <div class="results-chart-wrap" style="margin-top:16px;"><canvas id="anovaChartCanvas" height="90"></canvas></div>
+  `;
+  const ctx = document.getElementById('anovaChartCanvas');
+  new Chart(ctx, {
+    type:'bar',
+    data:{labels: headers, datasets:[{label:'Group Mean', data:groups.map(g=>mean(g)), backgroundColor:'#3fbfa888', borderColor:'#3fbfa8', borderWidth:1}]},
+    options:{
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{ticks:{color:'#5c6577', font:{family:'JetBrains Mono', size:9}}, grid:{display:false}},
+        y:{ticks:{color:'#5c6577', font:{family:'JetBrains Mono', size:9}}, grid:{color:'#2a3140'}}
+      }
+    }
+  });
+  lastAnovaReport = `SigmaPro — One-Way ANOVA Report
+Generated: ${new Date().toLocaleString()}
+
+Groups: ${headers.join(', ')}
+F(${dfB},${dfW}) = ${F.toFixed(4)}
+p-value = ${isNaN(p)?'n/a':p.toFixed(5)}
+
+${groups.map((g,i)=>`${headers[i]}: n=${g.length}, mean=${mean(g).toFixed(4)}, sd=${stdevSample(g).toFixed(4)}`).join('\n')}
+
+Verdict: ${significant? 'Statistically significant difference between group means (p < 0.05).' : 'No statistically significant difference between group means (p >= 0.05).'}
+`;
+}
+
+/* ---------- DOE ---------- */
+function renderDOEFactorInputs(){
+  const n = Number(document.getElementById('doeFactorCount').value);
+  const names = ['A','B','C','D'];
+  let html = '';
+  for(let i=0;i<n;i++){
+    html += `<div class="row-2" style="margin-bottom:10px;">
+      <div class="field" style="margin-bottom:0;"><label>Factor ${names[i]} name</label><input type="text" id="doeName${i}" value="Factor ${names[i]}"></div>
+      <div class="field" style="margin-bottom:0;"><label>Low / High</label>
+        <div style="display:flex; gap:6px;">
+          <input type="number" id="doeLow${i}" value="0" step="any">
+          <input type="number" id="doeHigh${i}" value="1" step="any">
+        </div>
+      </div>
+    </div>`;
+  }
+  document.getElementById('doeFactorInputs').innerHTML = html;
+}
+window.addEventListener('DOMContentLoaded', renderDOEFactorInputs);
+
+let doeDesign = null;
+function generateDOE(){
+  const n = Number(document.getElementById('doeFactorCount').value);
+  const names = []; 
+  for(let i=0;i<n;i++) names.push(document.getElementById('doeName'+i).value || ('Factor '+String.fromCharCode(65+i)));
+  const runs = Math.pow(2,n);
+  const matrix = [];
+  for(let r=0;r<runs;r++){
+    const row = [];
+    for(let f=0;f<n;f++){
+      const period = Math.pow(2,f);
+      const level = (Math.floor(r/period)%2===0) ? -1 : 1;
+      row.push(level);
+    }
+    matrix.push(row);
+  }
+  doeDesign = {names, matrix, responses: new Array(runs).fill('')};
+  renderDOETable();
+}
+function renderDOETable(){
+  const {names, matrix, responses} = doeDesign;
+  let head = '<tr><th>Run</th>' + names.map(n=>`<th>${n}</th>`).join('') + '<th>Response</th></tr>';
+  let body = matrix.map((row,ri)=>{
+    return '<tr><td>'+(ri+1)+'</td>' + row.map(v=>`<td>${v>0?'+1':'-1'}</td>`).join('') +
+      `<td><input type="number" step="any" style="width:80px; background:var(--surface-2); border:1px solid var(--line); color:var(--text); padding:4px 6px; border-radius:4px; font-family:var(--font-mono);" data-run="${ri}" onchange="doeDesign.responses[${ri}]=this.value" value="${responses[ri]}"></td></tr>`;
+  }).join('');
+  document.getElementById('doeResults').innerHTML = `
+    <div class="card" style="padding:18px;">
+      <table class="data-table">
+        <thead>${head}</thead>
+        <tbody>${body}</tbody>
+      </table>
+      <button class="btn-run" style="margin-top:16px;" onclick="calcDOEEffects()">Calculate Main Effects</button>
+    </div>
+    <div id="doeEffectsOut" style="margin-top:16px;"></div>
+  `;
+}
+function calcDOEEffects(){
+  const {names, matrix, responses} = doeDesign;
+  const y = responses.map(Number);
+  if(y.some(v=>isNaN(v))){ toast('Enter a response for every run'); return; }
+  const effects = names.map((name,f)=>{
+    const hi = []; const lo = [];
+    matrix.forEach((row,ri)=>{ if(row[f]>0) hi.push(y[ri]); else lo.push(y[ri]); });
+    return {name, effect: mean(hi)-mean(lo)};
+  });
+  effects.sort((a,b)=>Math.abs(b.effect)-Math.abs(a.effect));
+  const maxAbs = Math.max(...effects.map(e=>Math.abs(e.effect)));
+  const rows = effects.map(e=>`<tr><td>${e.name}</td><td>${e.effect.toFixed(4)}</td></tr>`).join('');
+  document.getElementById('doeEffectsOut').innerHTML = `
+    <div class="results-chart-wrap"><canvas id="doeEffectsChart" height="90"></canvas></div>
+    <table class="data-table"><thead><tr><th>Factor</th><th>Effect (high − low)</th></tr></thead><tbody>${rows}</tbody></table>
+    <div class="verdict-box good" style="margin-top:16px;"><div>✓</div><div><b>${effects[0].name} has the largest effect</b><br>Effect magnitude ${Math.abs(effects[0].effect).toFixed(4)} — prioritize this factor when setting the process window. Interaction analysis and full regression are available in the Plant plan.</div></div>
+  `;
+  const ctx = document.getElementById('doeEffectsChart');
+  new Chart(ctx, {
+    type:'bar',
+    data:{labels: effects.map(e=>e.name), datasets:[{label:'Effect', data:effects.map(e=>e.effect), backgroundColor: effects.map(e=>e.effect>=0?'#3fbfa888':'#e5533d88'), borderColor: effects.map(e=>e.effect>=0?'#3fbfa8':'#e5533d'), borderWidth:1}]},
+    options:{
+      indexAxis:'y',
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{ticks:{color:'#5c6577', font:{family:'JetBrains Mono', size:9}}, grid:{color:'#2a3140'}},
+        y:{ticks:{color:'#5c6577', font:{family:'JetBrains Mono', size:9}}, grid:{display:false}}
+      }
+    }
+  });
+}
+
+/* ---------- REPORT DOWNLOAD ---------- */
+function downloadReport(kind){
+  let text = '';
+  if(kind==='capability') text = lastCapReport;
+  if(kind==='spc') text = lastSpcReport;
+  if(kind==='anova') text = lastAnovaReport;
+  if(!text){ toast('Run the analysis first'); return; }
+  const blob = new Blob([text], {type:'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `sigmapro-${kind}-report.txt`;
+  a.click();
+}
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+/* ===== SigmaPro accounts + paywall. Fill these 3 values after Supabase setup. ===== */
+const SP_CFG={SUPABASE_URL:'', SUPABASE_ANON_KEY:'', API:'' /* e.g. https://YOURREF.supabase.co/functions/v1/api */, GATEWAY:false /* set true once your payment gateway is live */, CONTACT_EMAIL:'' /* fallback for the feedback form */};
+/* ===== YOUR PAYMENT ACCOUNT (shown to customers who pay by bank transfer or wallet). Replace every YOUR... value. ===== */
+const SP_PAY={bank:'Meezan Bank', qr:'pay-qr.png' /* your QR image */, title:'', account:'', iban:'', wallet:'' /* optional extra text lines shown under the QR */};
+/* One personal computer: a private random ID kept in this browser plus a coarse hardware signature. */
+const DEV=(()=>{let id;try{id=localStorage.getItem('sp_dev');if(!id){id=crypto.randomUUID();localStorage.setItem('sp_dev',id)}}catch(e){id=crypto.randomUUID()}
+  const fp=[navigator.platform,navigator.hardwareConcurrency,Intl.DateTimeFormat().resolvedOptions().timeZone,screen.width+'x'+screen.height].join('|');return id+'|'+btoa(fp).slice(0,40)})();
+const SP=(()=>{
+  const ok=()=>SP_CFG.SUPABASE_URL&&SP_CFG.SUPABASE_ANON_KEY&&SP_CFG.API&&window.supabase;
+  let sb=null, session=null, status=null, email='';
+  const $=id=>document.getElementById(id);
+  const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const open=h=>{$('spBody').innerHTML=h; $('spBack').classList.add('open'); const i=$('spBody').querySelector('input'); if(i)i.focus();};
+  const close=()=>$('spBack').classList.remove('open');
+  const api=(path,opt={})=>fetch(SP_CFG.API+'/'+path,{...opt,headers:{'Content-Type':'application/json','X-Device':DEV,...(session?{Authorization:'Bearer '+session.access_token}:{})}});
+  function chip(){
+    const b=$('acctBtn'); if(!session){b.textContent='Log in';return;}
+    const s=status||{}; const t={trial:`Trial · ${s.days} days left`,sub:'Pass · until '+(s.ends||'').slice(0,10),credit:s.credits+' reports',none:'Add credit'}[s.state]||'Account';
+    b.textContent=t;
+  }
+  async function refresh(){ if(!session)return; try{const r=await api('status'); if(r.ok)status=await r.json();}catch(e){} chip(); }
+  function loginStep1(){open(`<h3 id="spTitle">Log in or start your free trial</h3><p>We email you a 6-digit code. New accounts get 30 days free.</p><input class="sp-in" id="spEmail" type="email" placeholder="you@company.com" autocomplete="email"><button class="btn-primary" onclick="SP.sendCode()">Send code</button>`);}
+  async function sendCode(){
+    email=$('spEmail').value.trim(); if(!/^\S+@\S+\.\S+$/.test(email)){toast('Enter a valid email');return;}
+    const {error}=await sb.auth.signInWithOtp({email,options:{shouldCreateUser:true}});
+    if(error){toast('Could not send the code: '+error.message);return;}
+    open(`<h3 id="spTitle">Enter your code</h3><p>Sent to <b id="spTo"></b>. Check spam if it does not arrive in a minute.</p><input class="sp-in" id="spCode" inputmode="numeric" maxlength="8" placeholder="123456" autocomplete="one-time-code"><button class="btn-primary" onclick="SP.verify()">Log in</button>`);
+    $('spTo').textContent=email;
+  }
+  async function verify(){
+    const {error}=await sb.auth.verifyOtp({email,token:$('spCode').value.trim(),type:'email'});
+    if(error){toast('Code not accepted. Check it and try again.');return;}
+    close(); toast('Logged in');
+  }
+  const PROD={credit1:['One report (1 file)',200],pass30:['Monthly pass: 1 month, 1 computer',1000],pass365:['Yearly pass: 1 year, 1 computer',10000]};
+  function payModal(msg){open(`<h3 id="spTitle">Get your report</h3><p>${esc(msg||'Choose how you want to pay.')}</p><button class="btn-ghost" onclick="SP.buy('credit1')">This report · 200 PKR</button><button class="btn-primary" onclick="SP.buy('pass30')">Monthly pass · 1,000 PKR</button><button class="btn-ghost" onclick="SP.buy('pass365')">Yearly pass · 10,000 PKR</button>`);}
+  function openAccount(){
+    if(!ok()){toast('Sign-in is not configured yet');return;}
+    if(!session){loginStep1();return;}
+    const s=status||{},row=(a,b)=>`<div class="sp-row"><span>${a}</span><b>${esc(b)}</b></div>`;
+    open(`<h3 id="spTitle">Your account</h3><p id="spMail"></p>${row('Status',{trial:'Free trial',sub:s.plan==='yearly'?'Yearly pass':'Monthly pass',credit:'Pay per report',none:'No active plan'}[s.state]||'…')}${row('Report credits',s.credits??0)}${s.state==='trial'?row('Trial days left',s.days):''}${s.ends?row('Pass valid until',String(s.ends).slice(0,10)):''}${row('Computer',{ok:'This computer',other:'Another computer',unbound:'Not set yet'}[s.device]||'…')}${s.pending?row('Payments awaiting check',s.pending):''}<div style="height:14px"></div><button class="btn-ghost" onclick="SP.buy('credit1')">Buy 1 report · 200 PKR</button><button class="btn-primary" onclick="SP.buy('pass30')">Monthly pass · 1,000 PKR</button><button class="btn-ghost" onclick="SP.buy('pass365')">Yearly pass · 10,000 PKR</button>${s.device==='other'?'<button class="btn-ghost" onclick="SP.reset()">Use this computer</button>':''}<button class="btn-ghost" onclick="SP.logout()">Log out</button>`);
+    $('spMail').textContent=session.user.email;
+  }
+  function buy(product){
+    if(!ok()){toast('Payments are not configured yet');return;}
+    if(!session){loginStep1();return;}
+    SP_CFG.GATEWAY?gateway(product):manual(product);
+  }
+  async function gateway(product){
+    const r=await api('checkout',{method:'POST',body:JSON.stringify({product})});
+    const j=await r.json().catch(()=>({})); if(!r.ok||!j.url){toast(j.error||'Could not start payment');return;}
+    location.href=j.url;
+  }
+  function manual(product){
+    const P=SP_PAY,[n,a]=PROD[product];
+    if(!P.qr&&!P.account){toast('Payment account is not set up yet');return;}
+    const row=(l,v)=>v?`<div class="sp-row"><span>${l}</span><b>${esc(v)}</b></div>`:'';
+    open(`<h3 id="spTitle">Pay ${a.toLocaleString()} PKR</h3><p>${esc(n)}</p><ol class="sp-steps"><li>Scan the QR code with your banking or wallet app.</li><li>Enter exactly <b>${a.toLocaleString()} PKR</b> and pay.</li><li>Type the transaction ID from your receipt below.</li></ol>${P.qr?`<img class="sp-qr" src="${esc(P.qr)}" alt="${esc(P.bank)} payment QR code"><p style="text-align:center;font-size:.8rem;margin-bottom:12px"><a href="${esc(P.qr)}" download="sigmapro-payment-qr.png" style="color:var(--amber)">Save QR image</a> (on a phone, import it from your gallery in your banking app)</p>`:''}${row('Bank',P.bank)}${row('Account title',P.title)}${row('Account no.',P.account)}${row('IBAN',P.iban)}${row('JazzCash / Easypaisa',P.wallet)}<div style="height:12px"></div><input class="sp-in" id="spTid" placeholder="Transaction ID / reference no." maxlength="60" autocomplete="off"><input class="sp-in" id="spNote" placeholder="Note (optional)" maxlength="120"><label class="sp-agree"><input type="checkbox" id="spAgree"> <span>I agree to the <a href="legal.html#terms" target="_blank" rel="noopener">Terms</a> and <a href="legal.html#refunds" target="_blank" rel="noopener">Refund policy</a>.</span></label><button class="btn-primary" onclick="SP.manualSend('${product}')">I have paid: submit for verification</button>`);
+  }
+  async function manualSend(product){
+    const ref=$('spTid').value.trim(); if(ref.length<6){toast('Enter the transaction ID from your receipt');return;}
+    if(!$('spAgree').checked){toast('Please accept the Terms and Refund policy');return;}
+    const r=await api('manual',{method:'POST',body:JSON.stringify({product,ref,note:$('spNote').value.trim()})});
+    const j=await r.json().catch(()=>({})); if(!r.ok){toast(j.error||'Could not submit');return;}
+    open('<h3 id="spTitle">Payment submitted</h3><p>We will check the payment against our account and activate your access, usually within 24 hours. You will get an email when it is active.</p><button class="btn-primary" onclick="SP.close()">Done</button>');refresh();
+  }
+  async function reset(){
+    const r=await api('device/reset',{method:'POST'}),j=await r.json().catch(()=>({})); if(!r.ok){toast(j.error||'Could not reset');return;}
+    close();toast('This computer is now your registered computer');refresh();
+  }
+  async function download(kind){
+    const text={capability:lastCapReport,spc:lastSpcReport,anova:lastAnovaReport}[kind];
+    if(!text){toast('Run the analysis first');return;}
+    if(!ok()){toast('Sign-in is not configured yet');return;}
+    if(!session){loginStep1();return;}
+    const r=await api('report',{method:'POST',body:JSON.stringify({kind,text})});
+    if(r.status===402){payModal('You have no active trial, pass or file credit. Pay for this file or take a pass.');return;}
+    if(r.status===403){open('<h3 id="spTitle">Another computer is registered</h3><p>Downloads are licensed for one personal computer. To move your licence to this computer, reset it (allowed 2 times per year).</p><button class="btn-primary" onclick="SP.reset()">Use this computer</button>');return;}
+    if(!r.ok){toast('Download failed. You were not charged.');return;}
+    const a=document.createElement('a'); a.href=URL.createObjectURL(await r.blob()); a.download=`sigmapro-${kind}-report.docx`; a.click();
+    refresh();
+  }
+  async function fbSend(){
+    const g=i=>$(i).value.trim(),b={kind:g('fbKind'),name:g('fbName'),email:g('fbEmail'),message:g('fbMsg'),rating:g('fbRate'),website:g('fbWeb')};
+    if(b.message.length<10){toast('Please write at least 10 characters');return;}
+    if(b.kind==='complaint'&&!/^\S+@\S+\.\S+$/.test(b.email)){toast('Add your email so we can reply to your complaint');return;}
+    if(!SP_CFG.API){if(SP_CFG.CONTACT_EMAIL){location.href='mailto:'+SP_CFG.CONTACT_EMAIL+'?subject='+encodeURIComponent('SigmaPro '+b.kind)+'&body='+encodeURIComponent(b.message+'\n\n'+b.name+' '+b.email);return;}toast('The feedback form is not configured yet');return;}
+    const r=await api('feedback',{method:'POST',body:JSON.stringify(b)}),j=await r.json().catch(()=>({}));
+    if(!r.ok){toast(j.error||'Could not send');return;}
+    $('fbForm').innerHTML='<p style="color:var(--teal)">Thank you. Your '+esc(b.kind)+' was received'+(b.email?', and we will reply by email if needed.':'.')+'</p>';
+  }
+  async function logout(){await sb.auth.signOut(); close(); toast('Logged out');}
+  async function sponsors(){
+    const el=$('sponsorSlot'); if(!el)return;
+    try{
+      const d=await (await fetch('sponsors.json',{cache:'no-store'})).json(); const today=new Date().toISOString().slice(0,10);
+      const live=(d.ads||[]).filter(a=>a.start<=today&&today<=a.end&&new URL(a.image,location.href).origin===location.origin&&a.alt);
+      if(!live.length)return; const a=live[Math.floor(Math.random()*live.length)];
+      const link=document.createElement('a'); link.href=a.link; link.rel='sponsored noopener'; link.target='_blank';
+      const img=document.createElement('img'); img.src=a.image; img.alt=a.alt; link.appendChild(img);
+      const lab=document.createElement('small'); lab.textContent='Sponsor'; el.append(lab,link); el.hidden=false;
+      const ping=ev=>SP_CFG.API&&navigator.sendBeacon(SP_CFG.API+'/track',JSON.stringify({ad:a.id,event:ev}));
+      ping('impression'); link.addEventListener('click',()=>ping('click'));
+    }catch(e){}
+  }
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')close();});
+  $('spBack').addEventListener('click',e=>{if(e.target.id==='spBack')close();});
+  if(ok()){sb=window.supabase.createClient(SP_CFG.SUPABASE_URL,SP_CFG.SUPABASE_ANON_KEY);
+    sb.auth.getSession().then(({data})=>{session=data.session;chip();refresh();});
+    sb.auth.onAuthStateChange((_e,sess)=>{session=sess;status=null;chip();refresh();});}
+  sponsors();
+  return {openAccount,sendCode,verify,buy,manualSend,reset,download,fbSend,logout,close};
+})();
+/* Replaces the old free .txt download: every report now goes through the server check. */
+function downloadReport(kind){SP.download(kind);}
+</script>
+<script>
+/* ===== QC Toolkit: 7 QC tools + control charts, templates, guide ===== */
+const QC=(()=>{
+const $=id=>document.getElementById(id),esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const C={amber:'#f2a93b',teal:'#3fbfa8',red:'#e5533d',dim:'#909aab',line:'#2a3140',txt:'#e9ebee'};
+const f=(x,d=2)=>Number(x).toFixed(d),num=x=>parseFloat(String(x).replace(/,/g,'')),sum=a=>a.reduce((s,x)=>s+x,0);
+const D2=[0,0,1.128,1.693,2.059,2.326,2.534,2.704,2.847,2.970,3.078],D3=[0,0,.853,.888,.880,.864,.848,.833,.820,.808,.797];
+let charts=[],cur=null,gs={};
+const G=seed=>{let s=seed;const u=()=>(s=s*16807%2147483647)/2147483647;return{u,n:(m,sd)=>m+sd*Math.sqrt(-2*Math.log(u()))*Math.cos(6.2832*u())}};
+const pois=(g,l)=>{const L=Math.exp(-l);let k=0,p=1;do{k++;p*=g.u()}while(p>L);return k-1};
+const csv=(h,r)=>[h,...r.map(x=>x.join(','))].join('\n'),rng=(n,fn)=>Array.from({length:n},(_,i)=>fn(i));
+const xh=n=>'Subgroup,'+rng(n,i=>'X'+(i+1)).join(',');
+const T={
+checksheet:{s:'Check Sheet',t:'Check Sheet',u:'Tally how often each problem happens, by day, shift or machine. Use it when you have no data yet.',c:'Column 1 = defect type; the other columns = counts per day or shift (any number).',h:'Defect type,Mon,Tue,Wed,Thu,Fri',e:'Scratch,3,5,2,4,1',d:()=>csv('Defect type,Mon,Tue,Wed,Thu,Fri',[['Scratch',3,5,2,4,1],['Broken stitch',6,4,7,5,8],['Colour mismatch',1,0,2,1,0],['Dirt mark',2,3,1,2,4]])},
+pareto:{s:'Pareto',t:'Pareto Chart',u:'Rank problems by size to find the vital few that cause most of the loss.',c:'Column 1 = category; column 2 = count (or cost).',h:'Category,Count',e:'Broken stitch,64',d:()=>csv('Category,Count',[['Broken stitch',64],['Scratch',35],['Dirt mark',20],['Colour mismatch',9],['Wrong size',6],['Other',4]])},
+fishbone:{s:'Fishbone',t:'Cause-and-Effect (Fishbone) Diagram',u:'Organise possible causes of one problem by category (Man, Machine, Method, Material, Measurement, Environment).',c:'Column 1 = category; column 2 = one cause per row. Type the problem statement in the box below.',h:'Category,Cause',e:'Machine,Worn needle',d:()=>csv('Category,Cause',[['Machine','Worn needle'],['Machine','Tension drift'],['Method','No standard work'],['Method','Unclear setup sheet'],['Material','Thread variation'],['Material','Fabric shrinkage'],['Man','New operator'],['Man','Overtime fatigue'],['Measurement','Gauge not calibrated'],['Environment','High humidity'],['Environment','Poor lighting']])},
+hist:{s:'Histogram',t:'Histogram',u:'See the centre, spread and shape of measurements. Two peaks suggest mixed sources.',c:'One column of measurements (at least 5 values).',h:'Value',e:'10.12',d:()=>{const g=G(3);return csv('Value',rng(60,()=>[f(g.n(10,.2))]))}},
+scatter:{s:'Scatter',t:'Scatter Diagram',u:'Check whether two variables move together (for example temperature and defects).',c:'Column 1 = X (suspected cause); column 2 = Y (result).',h:'Temperature,Defects',e:'150,2.1',d:()=>{const g=G(5);return csv('Temperature,Defects',rng(25,i=>{const x=150+i*1.6;return[f(x,1),f(2+.15*(x-150)+g.n(0,.8),1)]}))}},
+strat:{s:'Stratification',t:'Stratification',u:'Split data by group (machine, shift, supplier) so differences hidden in the total become visible.',c:'Column 1 = group name; column 2 = measurement.',h:'Machine,Value',e:'A,10.05',d:()=>{const g=G(9);return csv('Machine,Value',['A','B','C'].flatMap((m,j)=>rng(10,()=>[m,f(g.n([10,10.25,9.85][j],.1))])))}},
+imr:{s:'I-MR',t:'Individuals & Moving Range (I-MR) Chart',u:'Measurements taken one at a time (daily reading, batch result). Also used when subgroups are not possible.',c:'One column of readings in time order (at least 5).',h:'Value',e:'10.12',d:()=>{const g=G(11);return csv('Value',rng(30,i=>[f(g.n(10,.12)+(i===19?.7:0))]))}},
+xbarr:{s:'X̄-R',t:'X̄-R Chart (subgroups of 2 to 10)',u:'Measurements taken in small subgroups (for example 5 pieces every hour).',c:'Column 1 = subgroup ID; the other columns = readings in that subgroup (2 to 10).',h:'Subgroup,X1,X2,X3,X4,X5',e:'1,10.1,9.9,10.2,10.0,10.1',d:()=>{const g=G(13);return csv(xh(5),rng(20,i=>[i+1,...rng(5,()=>f(g.n(10+(i===13?.25:0),.1)))]))}},
+xbars:{s:'X̄-S',t:'X̄-S Chart (subgroups above 10)',u:'Measurements in larger subgroups, where the standard deviation is a better spread measure than the range.',c:'Column 1 = subgroup ID; the other columns = readings (more than 10 per subgroup).',h:xh(12),e:'1,10.1,9.9,10.2,10.0,10.1,10.3,9.8,10.0,10.1,9.9,10.2,10.0',d:()=>{const g=G(15);return csv(xh(12),rng(15,i=>[i+1,...rng(12,()=>f(g.n(10+(i===9?.12:0),.1)))]))}},
+p:{s:'p',t:'p Chart (proportion defective)',u:'Count of defective units (pass/fail) when the sample size changes from sample to sample.',c:'Sample ID, number inspected, number defective.',h:'Sample,Inspected,Defective',e:'1,200,9',d:()=>{const g=G(17);return csv('Sample,Inspected,Defective',rng(20,i=>{const n=160+Math.floor(g.u()*80);let d=0;for(let k=0;k<n;k++)if(g.u()<(i===12?.13:.05))d++;return[i+1,n,d]}))}},
+np:{s:'np',t:'np Chart (number defective)',u:'Count of defective units when the sample size is the same every time.',c:'Sample ID, number inspected (constant), number defective.',h:'Sample,Inspected,Defective',e:'1,100,5',d:()=>{const g=G(19);return csv('Sample,Inspected,Defective',rng(20,i=>{let d=0;for(let k=0;k<100;k++)if(g.u()<(i===14?.15:.05))d++;return[i+1,100,d]}))}},
+c:{s:'c',t:'c Chart (defects per unit)',u:'Count of defects (several possible per unit) when each sample covers the same area or number of units.',c:'Sample ID, number of defects.',h:'Sample,Defects',e:'1,6',d:()=>{const g=G(21);return csv('Sample,Defects',rng(25,i=>[i+1,pois(g,i===16?17:6)]))}},
+u:{s:'u',t:'u Chart (defects per unit area)',u:'Count of defects when the inspected area or number of units changes between samples.',c:'Sample ID, units (or area) inspected, number of defects.',h:'Sample,Units,Defects',e:'1,10,5',d:()=>{const g=G(23);return csv('Sample,Units,Defects',rng(20,i=>{const n=8+Math.floor(g.u()*7);return[i+1,n,pois(g,n*(i===11?1.4:.5))]}))}}};
+const ax=t=>({ticks:{color:C.dim},grid:{color:C.line},title:t?{display:true,text:t,color:C.dim}:{display:false}});
+function panel(t){const d=document.createElement('div');d.className='chart-panel';d.innerHTML=`<div class="chart-panel-head"><span class="title">${esc(t)}</span></div><canvas></canvas>`;$('qcOut').appendChild(d);return d.querySelector('canvas')}
+function mk(cv,type,data,o={}){charts.push(new Chart(cv,{type,data,options:{scales:{x:ax(),y:ax()},...o,plugins:{legend:{labels:{color:C.dim}}}}}))}
+const note=h=>{const d=document.createElement('div');d.className='qc-read';d.innerHTML=h;$('qcOut').appendChild(d)};
+const err=m=>{const d=document.createElement('div');d.className='qc-read qc-err';d.textContent=m;$('qcOut').appendChild(d)};
+function tbl(h,r){const d=document.createElement('div');d.style.overflowX='auto';d.innerHTML=`<table class="qc-t"><tr>${h.map(x=>`<th>${esc(x)}</th>`).join('')}</tr>${r.map(x=>`<tr>${x.map(y=>`<td>${esc(y)}</td>`).join('')}</tr>`).join('')}</table>`;$('qcOut').appendChild(d)}
+function cc(title,lab,v,cl,ucl,lcl,d=3){
+ const A=x=>Array.isArray(x)?x:v.map(()=>x),M=A(cl),U=A(ucl),L=A(lcl),r1=v.map((x,i)=>x>U[i]||x<L[i]),r2=v.map(()=>false);
+ let run=0,sd=0;v.forEach((x,i)=>{const s=Math.sign(x-M[i]);if(s&&s===sd)run++;else{run=s?1:0;sd=s}if(run>=8)for(let k=i-7;k<=i;k++)r2[k]=true});
+ mk(panel(title),'line',{labels:lab,datasets:[
+  {label:'Value',data:v,borderColor:C.txt,borderWidth:1.5,pointRadius:4,pointBackgroundColor:v.map((_,i)=>r1[i]?C.red:r2[i]?C.amber:C.txt),tension:0},
+  {label:'Centre',data:M,borderColor:C.teal,borderDash:[6,4],pointRadius:0,borderWidth:1.5},
+  {label:'UCL',data:U,borderColor:C.red,borderDash:[3,3],pointRadius:0,borderWidth:1.5,stepped:true},
+  {label:'LCL',data:L,borderColor:C.red,borderDash:[3,3],pointRadius:0,borderWidth:1.5,stepped:true}]});
+ const a=lab.filter((_,i)=>r1[i]),b=lab.filter((_,i)=>r2[i]);
+ note(`<b>${esc(title)}</b>: centre ${f(M[0],d)}. `+(a.length?`<b style="color:var(--red)">${a.length} point(s) beyond the 3-sigma limits (${a.join(', ')})</b>: look for a special cause. `:'No point beyond the limits. ')+(b.length?`<b style="color:var(--amber)">8 or more points in a row on one side of the centre (${b.join(', ')})</b>: possible shift.`:''))}
+const R={
+checksheet(h,r){const tot=r.map(x=>sum(x.slice(1).map(v=>num(v)||0)));
+ tbl([...h,'Total'],[...r.map((x,i)=>[...x,tot[i]]),['Total',...h.slice(1).map((_,j)=>sum(r.map(x=>num(x[j+1])||0))),sum(tot)]]);
+ const pal=[C.amber,C.teal,'#6f9bf2','#c586e0',C.red,'#8bd17c','#f0d264'];
+ mk(panel('Defects by type and period'),'bar',{labels:r.map(x=>x[0]),datasets:h.slice(1).map((c,j)=>({label:c,data:r.map(x=>num(x[j+1])||0),backgroundColor:pal[j%7]}))},{scales:{x:{...ax(),stacked:true},y:{...ax(),stacked:true}}});
+ const m=tot.indexOf(Math.max(...tot));note(`Most frequent: <b>${esc(r[m][0])}</b> (${tot[m]} of ${sum(tot)}). Use a Pareto chart next to rank the problems.`)},
+pareto(h,r){const d=r.map(x=>[x[0],num(x[1])]).filter(x=>isFinite(x[1])).sort((a,b)=>b[1]-a[1]),t=sum(d.map(x=>x[1]));if(d.length<2||t<=0)return err('Need at least 2 categories with counts in column 2.');
+ let c=0;const cum=d.map(x=>(c+=x[1])/t*100),few=cum.findIndex(x=>x>=80);
+ mk(panel('Pareto chart'),'bar',{labels:d.map(x=>x[0]),datasets:[{type:'line',label:'Cumulative %',data:cum,borderColor:C.red,yAxisID:'y1',pointRadius:3,tension:0},{label:h[1]||'Count',data:d.map(x=>x[1]),backgroundColor:d.map((_,i)=>i<=few?C.amber:C.teal),yAxisID:'y'}]},{scales:{x:ax(),y:ax('Count'),y1:{...ax('Cumulative %'),position:'right',min:0,max:100,grid:{drawOnChartArea:false}}}});
+ note(`The top <b>${few+1}</b> of ${d.length} categories (amber) account for <b>${f(cum[few],0)}%</b> of the total. Fix these first.`)},
+fishbone(h,r){const eff=$('qcEff').value.trim()||'Problem',g={};r.forEach(x=>{const a=(x[0]||'').trim(),b=(x[1]||'').trim();if(a&&b)(g[a]=g[a]||[]).push(b)});const k=Object.keys(g);if(!k.length)return err('Need a Category and a Cause on each row.');
+ const W=960,H=460,sy=H/2,x1=760,wr=(t,n)=>{const o=[];let l='';t.split(/\s+/).forEach(w=>{if((l+' '+w).trim().length>n&&l){o.push(l);l=w}else l=(l+' '+w).trim()});o.push(l);return o.slice(0,4)};
+ let s=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto" font-family="Inter,sans-serif"><line x1="20" y1="${sy}" x2="${x1}" y2="${sy}" stroke="${C.amber}" stroke-width="3"/><rect x="${x1}" y="${sy-40}" width="${W-x1-10}" height="80" rx="8" fill="#1e2530" stroke="${C.amber}"/>`;
+ wr(eff,18).forEach((l,i,a)=>s+=`<text x="${x1+(W-x1-10)/2}" y="${sy+4+(i-(a.length-1)/2)*16}" fill="${C.txt}" font-size="13" font-weight="600" text-anchor="middle">${esc(l)}</text>`);
+ [k.filter((_,i)=>i%2===0),k.filter((_,i)=>i%2===1)].forEach((arr,ri)=>arr.forEach((c,i)=>{const sp=(x1-200)/arr.length,xa=170+i*sp,xb=xa+70,ya=ri?H-56:56,lim=arr.length>3?20:26;
+  s+=`<line x1="${xa}" y1="${ya}" x2="${xb}" y2="${sy}" stroke="${C.teal}" stroke-width="2"/><text x="${xa}" y="${ya+(ri?22:-12)}" fill="${C.teal}" font-size="13" font-weight="700" text-anchor="middle">${esc(c)}</text>`;
+  g[c].slice(0,6).forEach((z,j,a)=>{const t=(j+1)/(a.length+1),y=ya+(sy-ya)*t,x=xa+70*t;s+=`<line x1="${x-30}" y1="${y}" x2="${x}" y2="${y}" stroke="${C.dim}"/><text x="${x-34}" y="${y+4}" fill="${C.txt}" font-size="11" text-anchor="end">${esc(z.length>lim?z.slice(0,lim-1)+'…':z)}</text>`})}));
+ const d=document.createElement('div');d.className='chart-panel';d.innerHTML=s+'</svg>';$('qcOut').appendChild(d);
+ note(`${k.length} categories, ${sum(k.map(c=>g[c].length))} causes. Pick the 2 or 3 most likely and verify them with data (Pareto, Scatter or ANOVA).`)},
+hist(h,r){const v=r.map(x=>num(x[0])).filter(isFinite),n=v.length;if(n<5)return err('Need at least 5 values in column 1.');
+ const mn=Math.min(...v),mx=Math.max(...v),k=Math.ceil(1+Math.log2(n)),w=(mx-mn)/k||1,cnt=Array(k).fill(0);v.forEach(x=>cnt[Math.min(k-1,Math.floor((x-mn)/w))]++);
+ const m=jStat.mean(v),s=jStat.stdev(v,true),mid=cnt.map((_,i)=>mn+w*(i+.5)),sk=jStat.skewness(v);
+ mk(panel('Histogram'),'bar',{labels:mid.map(x=>f(x)),datasets:[{label:'Frequency',data:cnt,backgroundColor:C.teal,barPercentage:1,categoryPercentage:1},{type:'line',label:'Normal curve',data:mid.map(x=>jStat.normal.pdf(x,m,s)*n*w),borderColor:C.amber,pointRadius:0,tension:.4}]},{scales:{x:ax(h[0]),y:ax('Frequency')}});
+ note(`n = ${n}, mean = ${f(m,3)}, SD = ${f(s,3)}, min = ${f(mn,3)}, max = ${f(mx,3)}. Shape: ${Math.abs(sk)<.5?'roughly symmetric':sk>0?'skewed to the right':'skewed to the left'}. Two separate peaks would suggest mixed sources: try Stratification.`)},
+scatter(h,r){const p=r.map(x=>[num(x[0]),num(x[1])]).filter(x=>isFinite(x[0])&&isFinite(x[1]));if(p.length<3)return err('Need at least 3 rows with numbers in columns 1 and 2.');
+ const X=p.map(a=>a[0]),Y=p.map(a=>a[1]),mx=jStat.mean(X),my=jStat.mean(Y),sl=sum(p.map(a=>(a[0]-mx)*(a[1]-my)))/(sum(X.map(x=>(x-mx)**2))||1),b=my-sl*mx,rr=jStat.corrcoeff(X,Y),x0=Math.min(...X),x9=Math.max(...X);
+ mk(panel('Scatter diagram'),'scatter',{datasets:[{label:'Data',data:p.map(a=>({x:a[0],y:a[1]})),backgroundColor:C.teal},{type:'line',label:'Trend line',data:[{x:x0,y:sl*x0+b},{x:x9,y:sl*x9+b}],borderColor:C.amber,pointRadius:0}]},{scales:{x:{type:'linear',...ax(h[0])},y:ax(h[1])}});
+ const a=Math.abs(rr);note(`r = ${f(rr,3)}, R² = ${f(rr*rr,3)}, slope = ${f(sl,4)}. ${a>=.7?'Strong':a>=.4?'Moderate':'Weak or no'} ${rr<0?'negative':'positive'} relationship. Correlation does not prove cause: confirm with an experiment.`)},
+strat(h,r){const g={};r.forEach(x=>{const v=num(x[1]);if(x[0]&&isFinite(v))(g[x[0]]=g[x[0]]||[]).push(v)});const k=Object.keys(g);if(k.length<2)return err('Need at least 2 groups in column 1 with numbers in column 2.');
+ const st=k.map(a=>[a,g[a].length,jStat.mean(g[a]),g[a].length>1?jStat.stdev(g[a],true):0,Math.min(...g[a]),Math.max(...g[a])]);
+ tbl(['Group','n','Mean','SD','Min','Max'],st.map(x=>[x[0],x[1],f(x[2],3),f(x[3],3),f(x[4],3),f(x[5],3)]));
+ mk(panel('Group comparison: mean, max, min'),'bar',{labels:k,datasets:[{label:'Mean',data:st.map(x=>x[2]),backgroundColor:C.teal},{type:'line',label:'Max',data:st.map(x=>x[5]),showLine:false,pointStyle:'triangle',borderColor:C.amber,pointRadius:6},{type:'line',label:'Min',data:st.map(x=>x[4]),showLine:false,pointStyle:'rectRot',borderColor:C.red,pointRadius:6}]},{scales:{x:ax(h[0]),y:ax(h[1])}});
+ const hi=st.reduce((a,b)=>b[2]>a[2]?b:a),lo=st.reduce((a,b)=>b[2]<a[2]?b:a);note(`Highest mean: <b>${esc(hi[0])}</b>; lowest: <b>${esc(lo[0])}</b> (difference ${f(hi[2]-lo[2],3)}). Use the ANOVA module to test whether the difference is real.`)},
+imr(h,r){const v=r.map(x=>num(x[0])).filter(isFinite);if(v.length<5)return err('Need at least 5 readings in column 1.');
+ const mr=v.slice(1).map((x,i)=>Math.abs(x-v[i])),xb=jStat.mean(v),mb=jStat.mean(mr),lab=v.map((_,i)=>i+1);
+ cc('Individuals (I) chart',lab,v,xb,xb+2.66*mb,xb-2.66*mb);cc('Moving range (MR) chart',lab.slice(1),mr,mb,3.267*mb,0)},
+xbarr(h,r){sub(r,false)},xbars(h,r){sub(r,true)},
+p(h,r){const d=att(r);if(!d)return;const pb=sum(d.map(x=>x[2]))/sum(d.map(x=>x[1])),se=d.map(x=>3*Math.sqrt(pb*(1-pb)/x[1]));
+ cc('p chart (proportion defective)',d.map(x=>x[0]),d.map(x=>x[2]/x[1]),pb,se.map(s=>Math.min(1,pb+s)),se.map(s=>Math.max(0,pb-s)),4)},
+np(h,r){const d=att(r);if(!d)return;const n=d[0][1];if(d.some(x=>x[1]!==n))return err('Sample sizes differ, so use the p chart instead.');
+ const pb=sum(d.map(x=>x[2]))/(n*d.length),s=3*Math.sqrt(n*pb*(1-pb));cc('np chart (number defective)',d.map(x=>x[0]),d.map(x=>x[2]),n*pb,n*pb+s,Math.max(0,n*pb-s))},
+c(h,r){const d=r.map(x=>[x[0],num(x[1])]).filter(x=>isFinite(x[1])&&x[1]>=0);if(d.length<5)return err('Need at least 5 samples with defect counts in column 2.');
+ const cb=jStat.mean(d.map(x=>x[1])),s=3*Math.sqrt(cb);cc('c chart (defects per unit)',d.map(x=>x[0]),d.map(x=>x[1]),cb,cb+s,Math.max(0,cb-s))},
+u(h,r){const d=att(r);if(!d)return;const ub=sum(d.map(x=>x[2]))/sum(d.map(x=>x[1])),se=d.map(x=>3*Math.sqrt(ub/x[1]));
+ cc('u chart (defects per unit)',d.map(x=>x[0]),d.map(x=>x[2]/x[1]),ub,se.map(s=>ub+s),se.map(s=>Math.max(0,ub-s)),4)}};
+function att(r){const d=r.map(x=>[x[0],num(x[1]),num(x[2])]).filter(x=>x[1]>0&&isFinite(x[2])&&x[2]>=0);if(d.length<5){err('Need at least 5 samples: ID, size, count.');return null}
+ if(cur!=='u'&&d.some(x=>x[2]>x[1])){err('Defective count cannot exceed the number inspected.');return null}return d}
+function sub(r,S){const rows=r.map((x,i)=>({l:x[0]||i+1,v:x.slice(1).map(num).filter(isFinite)})).filter(x=>x.v.length>1);if(rows.length<5)return err('Need at least 5 subgroups with 2 or more readings each.');
+ if(!S&&rows.some(x=>x.v.length>10))return err('Subgroups larger than 10: use the X̄-S chart.');
+ const m=rows.map(x=>jStat.mean(x.v)),sp=rows.map(x=>S?jStat.stdev(x.v,true):Math.max(...x.v)-Math.min(...x.v)),xb=jStat.mean(m),sb=jStat.mean(sp),lab=rows.map(x=>x.l);
+ const K=rows.map(x=>{const k=x.v.length;if(S){const c4=Math.sqrt(2/(k-1))*jStat.gammafn(k/2)/jStat.gammafn((k-1)/2),q=Math.sqrt(1-c4*c4)/c4;return{a:3/(c4*Math.sqrt(k)),lo:Math.max(0,1-3*q),hi:1+3*q}}
+  const d2=D2[k],d3=D3[k];return{a:3/(d2*Math.sqrt(k)),lo:Math.max(0,1-3*d3/d2),hi:1+3*d3/d2}});
+ cc('X̄ chart (subgroup means)',lab,m,xb,K.map(k=>xb+k.a*sb),K.map(k=>xb-k.a*sb));cc(S?'S chart (subgroup std. dev.)':'R chart (subgroup range)',lab,sp,sb,K.map(k=>k.hi*sb),K.map(k=>k.lo*sb))}
+function open(id){cur=id;const t=T[id];document.querySelectorAll('[data-qc]').forEach(b=>b.classList.toggle('active',b.dataset.qc===id));
+ $('qcPanel').hidden=false;$('qcT').textContent=t.t;$('qcU').textContent=t.u;$('qcC').textContent='Data format: '+t.c+' Row 1 of the template is an example; replace it with your own data.';
+ $('qcData').value='';$('qcData').placeholder=t.h+'\n'+t.e;$('qcEffW').hidden=id!=='fishbone';clr();$('qcPanel').scrollIntoView({behavior:'smooth',block:'nearest'})}
+function clr(){charts.forEach(c=>c.destroy());charts=[];$('qcOut').innerHTML=''}
+function draw(){if(!cur)return;const x=$('qcData').value.trim();if(!x){toast('Paste data, upload a CSV, or press Load example');return}
+ const p=Papa.parse(x,{skipEmptyLines:true}).data;clr();try{R[cur](p[0].map(s=>String(s).trim()),p.slice(1))}catch(e){err('Could not draw this chart. Check that your data follows the template.')}}
+function dl(name,text){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:'text/csv'}));a.download=name;a.click()}
+const tpl=()=>cur&&dl(`sigmapro-${cur}-template.csv`,T[cur].h+'\n'+T[cur].e+'\n');
+const demo=()=>{if(!cur)return;$('qcData').value=T[cur].d();draw()};
+function up(el){const fl=el.files[0];if(!fl)return;const r=new FileReader();r.onload=()=>{$('qcData').value=r.result;draw()};r.readAsText(fl);el.value=''}
+const O={goal:[['monitor','Monitor a process over time (is it stable?)'],['pareto','Find the biggest problems or defect types'],['dist','See the shape and spread of my measurements'],['rel','Check whether two things are related'],['cmp','Compare groups (machines, shifts, suppliers)'],['tally','Collect and tally defects on a sheet'],['cause','Brainstorm root causes of a problem']],
+ kind:[['meas','Measurements (length, weight, time, temperature)'],['bad','Count of defective items (each unit pass or fail)'],['defects','Count of defects (several possible per unit or area)']],
+ sub:{meas:[['1','One reading at a time'],['2-10','Small groups of 2 to 10 readings'],['>10','Large groups of more than 10 readings']],bad:[['same','Same sample size every time'],['vary','Sample size changes']],defects:[['same','Same inspected units or area every time'],['vary','Inspected units or area changes']]}};
+const Q={meas:'How many readings per sample?',bad:'Is the sample size the same every time?',defects:'Is the inspected area or number of units the same every time?'};
+const W={pareto:['pareto','A Pareto chart ranks problems so you fix the vital few first.'],dist:['hist','A histogram shows centre, spread and shape, and can reveal mixed sources.'],rel:['scatter','A scatter diagram shows whether two variables move together.'],cmp:['strat','Stratification splits data by group so hidden differences show up.'],tally:['checksheet','A check sheet is the simplest way to collect defect counts consistently.'],cause:['fishbone','A fishbone organises possible causes by category so none is missed.']};
+const CC={meas:{'1':['imr','Individual readings: use the I-MR chart.'],'2-10':['xbarr','Small subgroups: use the X̄-R chart.'],'>10':['xbars','Subgroups above 10: use X̄-S, because the range loses efficiency.']},bad:{same:['np','Constant sample size: np chart (the p chart also works).'],vary:['p','Changing sample size: p chart.']},defects:{same:['c','Constant area or units: c chart.'],vary:['u','Changing area or units: u chart.']}};
+const sel=(k,o,q)=>`<div class="field"><label>${q}</label><select onchange="QC.g('${k}',this.value)"><option value="">Choose…</option>${o.map(x=>`<option value="${x[0]}"${gs[k]===x[0]?' selected':''}>${x[1]}</option>`).join('')}</select></div>`;
+function rg(){let h='<h4>Which chart fits my data?</h4>'+sel('goal',O.goal,'What do you want to do?');
+ if(gs.goal==='monitor'){h+=sel('kind',O.kind,'What kind of data do you have?');if(gs.kind)h+=sel('sub',O.sub[gs.kind],Q[gs.kind])}
+ const r=gs.goal&&gs.goal!=='monitor'?W[gs.goal]:gs.goal==='monitor'&&gs.kind&&gs.sub?CC[gs.kind][gs.sub]:null;
+ if(r)h+=`<div class="qc-read"><b>Recommended: ${T[r[0]].t}</b><br>${r[1]}<br><button class="btn-run" style="margin-top:12px" onclick="QC.open('${r[0]}')">Open the ${T[r[0]].s} template and chart</button></div>`;
+ $('qcGuide').innerHTML=h}
+function g(k,v){gs[k]=v;if(k==='goal'){gs.kind='';gs.sub=''}if(k==='kind')gs.sub='';rg()}
+const grp=(l,ids)=>`<div class="qc-lab">${l}</div><div class="tabbar" style="margin-bottom:14px">${ids.map(i=>`<button class="tabbtn" data-qc="${i}" onclick="QC.open('${i}')">${T[i].s}</button>`).join('')}</div>`;
+$('qcPick').innerHTML=grp('Six QC tools',['checksheet','pareto','fishbone','hist','scatter','strat'])+grp('The seventh tool: control charts (pick by data type)',['imr','xbarr','xbars','p','np','c','u']);rg();
+return{open,tpl,demo,draw,up,g}})();
+</script>
+</body>
+</html>
