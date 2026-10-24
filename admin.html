@@ -1,5 +1,5 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>SigmaPro Admin</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js"></script>
 <style>body{font:15px system-ui,sans-serif;background:#0e1116;color:#e9ebee;margin:0;padding:24px;max-width:960px;margin-inline:auto}h1,h2{font-weight:600}input,button{font:inherit;padding:9px 12px;border-radius:6px;border:1px solid #2a3140;background:#161b22;color:#e9ebee}button{cursor:pointer}.ok{background:#3fbfa8;color:#0e1116;border:0}.no{border-color:#e5533d;color:#e5533d}table{width:100%;border-collapse:collapse;margin:10px 0 28px}td,th{border-bottom:1px solid #2a3140;padding:8px;text-align:left;vertical-align:top;font-size:14px}small{color:#909aab}</style></head><body>
 <h1>SigmaPro admin</h1><div id="login"><p>Log in with an admin email.</p><input id="em" type="email" placeholder="admin email"> <button onclick="send()">Send code</button> <input id="cd" placeholder="code" size="8"> <button onclick="check()">Log in</button></div>
 <div id="app" hidden><h2>Payments awaiting verification</h2><p><small>Match the amount and transaction ID with your bank or wallet statement before approving.</small></p><div id="pay"></div>
@@ -7,7 +7,7 @@
 <h2>Reset a customer's computer</h2><input id="re" type="email" placeholder="customer email"> <button onclick="resetDev()">Reset</button>
 <h2>Feedback, suggestions, complaints</h2><div id="fb"></div></div>
 <script>
-const CFG={SUPABASE_URL:'',SUPABASE_ANON_KEY:'',API:''}; /* same three values as index.html */
+const CFG={SUPABASE_URL:'https://igwpqzfxnetdkqloahul.supabase.co',SUPABASE_ANON_KEY:'sb_publishable_wGbgEFcxgisNgAJyDD6CxA_qR7mKMLY',API:'https://igwpqzfxnetdkqloahul.supabase.co/functions/v1/api'}; /* same three values as index.html */
 const sb=supabase.createClient(CFG.SUPABASE_URL,CFG.SUPABASE_ANON_KEY),$=i=>document.getElementById(i),E=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const call=async(p,body)=>{const {data}=await sb.auth.getSession();const r=await fetch(CFG.API+'/'+p,{method:body?'POST':'GET',headers:{'Content-Type':'application/json',Authorization:'Bearer '+data.session.access_token},body:body?JSON.stringify(body):undefined});return {ok:r.ok,j:await r.json().catch(()=>({}))}};
 async function send(){const {error}=await sb.auth.signInWithOtp({email:$('em').value.trim()});if(error)alert(error.message)}
