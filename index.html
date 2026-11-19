@@ -4,10 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SigmaPro — Six Sigma Statistical Engine for Master Black Belts</title>
-<meta name="description" content="SigmaPro: process capability, SPC, ANOVA and the 7 QC tools with control charts, built for quality engineers. Runs in your browser. 30 days free.">
+<meta name="description" content="SigmaPro: process capability, SPC, ANOVA and the 7 QC tools with control charts, built for quality engineers. Runs in your browser. 10 days free.">
 <meta name="theme-color" content="#0e1116">
 <meta property="og:title" content="SigmaPro: Six Sigma statistics and QC tools in your browser">
-<meta property="og:description" content="Capability, SPC, ANOVA, Pareto, fishbone and control charts with ready templates. 30 days free.">
+<meta property="og:description" content="Capability, SPC, ANOVA, Pareto, fishbone and control charts with ready templates. 10 days free.">
 <meta property="og:type" content="website">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%CF%83%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -210,7 +210,7 @@ table.data-table tr.oos td{color:var(--red);}
 @media(max-width:900px){.pricing-grid{grid-template-columns:1fr;}}
 .plan{background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:30px 26px; position:relative;}
 .plan.featured{border-color:var(--amber);}
-.plan.featured::before{content:'MOST CHOSEN'; position:absolute; top:-11px; left:26px; background:var(--amber); color:#181205; font-family:var(--font-mono); font-size:0.65rem; padding:3px 10px; border-radius:4px; letter-spacing:0.05em;}
+.plan.featured::before{content:'BEST FOR TEAMS'; position:absolute; top:-11px; left:26px; background:var(--amber); color:#181205; font-family:var(--font-mono); font-size:0.65rem; padding:3px 10px; border-radius:4px; letter-spacing:0.05em;}
 .plan .p-name{font-family:var(--font-display); font-weight:600; font-size:1.1rem; margin-bottom:6px;}
 .plan .p-for{font-size:0.8rem; color:var(--text-faint); margin-bottom:18px;}
 .plan .p-price{font-family:var(--font-mono); font-size:2rem; margin-bottom:2px;}
@@ -221,6 +221,9 @@ table.data-table tr.oos td{color:var(--red);}
 .plan li:first-child{border-top:none;}
 .plan li::before{content:'✓'; color:var(--teal); flex-shrink:0;}
 .plan .btn-ghost, .plan .btn-primary{display:block; text-align:center;}
+.plan button + button{margin-top:10px;}
+.btn-ghost:disabled{opacity:.55;cursor:not-allowed;}
+.price-label{font-family:var(--font-mono); font-size:0.75rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-faint); margin:0 0 14px;}
 
 footer{border-top:1px solid var(--line); padding:44px 0; color:var(--text-faint); font-size:0.82rem;}
 footer .wrap{display:flex; justify-content:space-between; flex-wrap:wrap; gap:16px;}
@@ -268,6 +271,19 @@ footer .wrap{display:flex; justify-content:space-between; flex-wrap:wrap; gap:16
 .sp-agree{display:flex; gap:8px; align-items:flex-start; font-size:0.8rem; color:var(--text-dim); margin-bottom:12px;}
 .sp-agree a{color:var(--amber);}
 .legal-links a{margin-right:16px; color:var(--text-dim);}
+.region-bar{display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin:0 0 26px;}
+.region-bar span{font-family:var(--font-mono); font-size:0.75rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-faint); margin-right:6px;}
+.region-bar button{background:none; border:1px solid var(--line); color:var(--text-dim); font:500 0.85rem var(--font-body); padding:8px 14px; border-radius:6px; cursor:pointer;}
+.region-bar button[aria-pressed="true"]{border-color:var(--amber); color:var(--text);}
+.region-bar button:focus-visible{outline:2px solid var(--amber); outline-offset:2px;}
+.price-regions{display:flex; flex-direction:column; gap:56px;}
+.region-head{margin:0 0 20px; padding-bottom:14px; border-bottom:1px solid var(--line);}
+.region-head h3{font-family:var(--font-display); font-size:1.35rem; font-weight:600; letter-spacing:-0.01em; margin:0 0 4px;}
+.region-head p{color:var(--text-dim); font-size:0.9rem; margin:0;}
+.sp-grp{font-family:var(--font-mono); font-size:0.7rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-faint); margin:16px 0 8px;}
+.sp-grp:first-child{margin-top:0;}
+.card-note{font-size:0.78rem; color:var(--text-faint); margin:0 0 12px;}
+.plan button[disabled]{opacity:.55; cursor:not-allowed;}
 </style>
 </head>
 <body>
@@ -579,51 +595,62 @@ footer .wrap{display:flex; justify-content:space-between; flex-wrap:wrap; gap:16
       <h2 class="section-title">Priced against the SME headcount it replaces, not the infrastructure it doesn't need</h2>
       <p class="section-desc">Every plan is a static web deployment — no MATLAB Runtime hosting, no per-core compute billing. You're paying for the engine and support, not servers.</p>
     </div>
+    <div class="price-regions">
+    <div id="pricePK">
+    <div class="region-head"><h3>Pakistan · PKR</h3><p>Pay by bank transfer or mobile wallet. Includes the 10-day free trial.</p></div>
     <div class="pkr-strip">
-      <div class="plan"><div class="p-name">Free trial</div><div class="p-for">Pakistan pricing (PKR)</div><div class="p-price">30<span> days free</span></div><div class="p-note">Sign up with your email. No card needed.</div><ul><li>All 4 modules</li><li>Formatted, watermarked reports</li></ul><button class="btn-primary" onclick="SP.openAccount()">Start 30-day free trial</button></div>
+      <div class="plan"><div class="p-name">Free trial</div><div class="p-for">All plans, Pakistan and international</div><div class="p-price">10<span> days free</span></div><div class="p-note">Sign up with your email. No card needed.</div><ul><li>All 4 modules</li><li>Formatted, watermarked reports</li></ul><button class="btn-primary" onclick="SP.openAccount()">Start 10-day free trial</button></div>
       <div class="plan"><div class="p-name">Per report</div><div class="p-for">One file, one computer</div><div class="p-price">200<span> PKR / report</span></div><div class="p-note">Analysis on screen stays free.</div><ul><li>Buy one report at a time</li><li>Credits never expire</li></ul><button class="btn-ghost" onclick="SP.buy('credit1')">Buy 1 report</button></div>
       <div class="plan"><div class="p-name">Monthly pass</div><div class="p-for">One person, one computer, 1 month</div><div class="p-price">1,000<span> PKR / month</span></div><div class="p-note">Cheaper than 5+ reports a month.</div><ul><li>Unlimited reports (fair use)</li><li>Renew when you need it</li></ul><button class="btn-primary" onclick="SP.buy('pass30')">Buy monthly pass</button></div>
       <div class="plan"><div class="p-name">Yearly pass</div><div class="p-for">One person, one computer, 1 year</div><div class="p-price">10,000<span> PKR / year</span></div><div class="p-note">Two months free vs monthly.</div><ul><li>Unlimited reports (fair use)</li><li>One payment for the year</li></ul><button class="btn-primary" onclick="SP.buy('pass365')">Buy yearly pass</button></div>
     </div>
+    </div>
+    <div id="priceINTL">
+    <div class="region-head"><h3>International · USD</h3><p>Pay by credit or debit card from anywhere in the world. Secure checkout by Polar.</p></div>
     <div class="pricing-grid">
       <div class="plan">
-        <div class="p-name">Belt</div>
+        <div class="p-name">SigmaPro Individual</div>
         <div class="p-for">A single certified Black Belt validating their own line</div>
-        <div class="p-price">$49<span>/mo</span></div>
-        <div class="p-note">Billed annually, 1 seat</div>
+        <div class="p-price">$10<span>/mo</span></div>
+        <div class="p-note">Billed monthly · 1 personal computer</div>
         <ul>
           <li>All 4 modules — Capability, SPC, ANOVA, DOE</li>
           <li>CSV upload, unlimited local analyses</li>
           <li>Downloadable reports</li>
         </ul>
-        <a href="#tool" class="btn-ghost">Start free</a>
+        <p class="card-note">Card payment, secure checkout by Polar. Cancel any time.</p>
+        <button class="btn-primary" data-usd="individual" onclick="SP.subscribeUSD('individual')">Subscribe · $10/month</button>
+        <button class="btn-ghost" onclick="SP.openAccount()">Start 10-day free trial</button>
       </div>
       <div class="plan featured">
-        <div class="p-name">Plant</div>
-        <div class="p-for">A quality team sharing one deployment across shifts</div>
-        <div class="p-price">$249<span>/mo</span></div>
-        <div class="p-note">Billed annually, up to 10 seats</div>
+        <div class="p-name">SigmaPro Team</div>
+        <div class="p-for">A quality team sharing one subscription across shifts</div>
+        <div class="p-price">$90<span>/mo</span></div>
+        <div class="p-note">Billed monthly · up to 10 personal computers</div>
         <ul>
-          <li>Everything in Belt</li>
-          <li>Shared design-matrix and report library</li>
-          <li>Branded report headers for audits</li>
-          <li>Priority formula-review support from an MBB</li>
+          <li>Everything in SigmaPro Individual</li>
+          <li>Use on up to 10 personal computers with one subscription and one login</li>
+          <li>Priority support on formula and report questions from a certified Black Belt</li>
         </ul>
-        <a href="#tool" class="btn-primary">Start free</a>
+        <p class="card-note">Card payment, secure checkout by Polar. Cancel any time.</p>
+        <button class="btn-primary" data-usd="team" onclick="SP.subscribeUSD('team')">Subscribe · $90/month</button>
+        <button class="btn-ghost" onclick="SP.openAccount()">Start 10-day free trial</button>
       </div>
       <div class="plan">
         <div class="p-name">Group</div>
         <div class="p-for">Multi-site manufacturers standardizing across plants</div>
         <div class="p-price">Custom</div>
-        <div class="p-note">Volume pricing, SSO, on-prem option</div>
+        <div class="p-note">Custom quote based on sites, seats and support level</div>
         <ul>
-          <li>Everything in Plant</li>
+          <li>Everything in SigmaPro Team</li>
           <li>Unlimited seats across sites</li>
-          <li>Custom control-limit constants and templates</li>
-          <li>Dedicated onboarding for your Black Belt network</li>
+          <li>A dedicated certified Six Sigma Black Belt guiding your team</li>
+          <li>Custom templates and control-limit constants, scoped to your needs</li>
         </ul>
-        <a href="#tool" class="btn-ghost">Talk to us</a>
+        <a href="#feedback" class="btn-ghost">Talk to us</a>
       </div>
+    </div>
+    </div>
     </div>
   </div>
 </section>
@@ -651,6 +678,7 @@ footer .wrap{display:flex; justify-content:space-between; flex-wrap:wrap; gap:16
 <footer>
   <div class="wrap">
     <div>SigmaPro — a statistical engine for Lean Six Sigma practitioners.</div>
+    <div>SigmaPro is a product of Kaizenov Ventures, operated by Fouad Mahboob, Karachi, Pakistan · <a href="mailto:support@kaizenovsigma.com" style="color:var(--text-dim)">support@kaizenovsigma.com</a></div>
     <div>Analysis runs in your browser and your data files stay on your computer. Only the calculated report text is sent when you request a Word report, and it is not stored.</div>
     <div class="legal-links"><a href="legal.html#terms">Terms</a><a href="legal.html#privacy">Privacy</a><a href="legal.html#refunds">Refund policy</a><a href="#feedback">Contact</a></div>
   </div>
@@ -801,6 +829,8 @@ function runCapability(){
   const mode = document.getElementById('capMode').value;
   const lsl = parseFloat(document.getElementById('capLSL').value);
   const usl = parseFloat(document.getElementById('capUSL').value);
+  if(isNaN(lsl)||isNaN(usl)){ toast('Enter both the lower (LSL) and upper (USL) specification limits'); return; }
+  if(lsl>=usl){ toast('LSL must be smaller than USL'); return; }
 
   let data=null, overallM=null, overallS=null, n=null;   // for Pp/Ppk (overall/long-term)
   let withinS=null, rbar=null, subgroupN=null;           // for Cp/Cpk (within-subgroup/short-term)
@@ -1253,7 +1283,7 @@ function calcDOEEffects(){
   document.getElementById('doeEffectsOut').innerHTML = `
     <div class="results-chart-wrap"><canvas id="doeEffectsChart" height="90"></canvas></div>
     <table class="data-table"><thead><tr><th>Factor</th><th>Effect (high − low)</th></tr></thead><tbody>${rows}</tbody></table>
-    <div class="verdict-box good" style="margin-top:16px;"><div>✓</div><div><b>${effects[0].name} has the largest effect</b><br>Effect magnitude ${Math.abs(effects[0].effect).toFixed(4)} — prioritize this factor when setting the process window. Interaction analysis and full regression are available in the Plant plan.</div></div>
+    <div class="verdict-box good" style="margin-top:16px;"><div>✓</div><div><b>${effects[0].name} has the largest effect</b><br>Effect magnitude ${Math.abs(effects[0].effect).toFixed(4)} — prioritize this factor when setting the process window. Interaction analysis and full regression are available in the SigmaPro Team plan.</div></div>
   `;
   const ctx = document.getElementById('doeEffectsChart');
   new Chart(ctx, {
@@ -1287,7 +1317,7 @@ function downloadReport(kind){
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js"></script>
 <script>
 /* ===== SigmaPro accounts + paywall. Fill these 3 values after Supabase setup. ===== */
-const SP_CFG={SUPABASE_URL:'https://igwpqzfxnetdkqloahul.supabase.co', SUPABASE_ANON_KEY:'sb_publishable_wGbgEFcxgisNgAJyDD6CxA_qR7mKMLY', API:'https://igwpqzfxnetdkqloahul.supabase.co/functions/v1/api' /* e.g. https://YOURREF.supabase.co/functions/v1/api */, GATEWAY:false /* set true once your payment gateway is live */, CONTACT_EMAIL:'sigmapro.support@gmail.com' /* fallback for the feedback form */};
+const SP_CFG={SUPABASE_URL:'https://igwpqzfxnetdkqloahul.supabase.co', SUPABASE_ANON_KEY:'sb_publishable_wGbgEFcxgisNgAJyDD6CxA_qR7mKMLY', API:'https://igwpqzfxnetdkqloahul.supabase.co/functions/v1/api' /* e.g. https://YOURREF.supabase.co/functions/v1/api */, GATEWAY:false /* leave false: PKR payments are manual (bank QR) */, POLAR_CHECKOUT:{individual:'https://buy.polar.sh/polar_cl_HGRNxEmKOTgK4mzN1UOS6gTiUYyPe9teCIMNC1XQb9o', team:'https://buy.polar.sh/polar_cl_domIAIjgUR4tCD5zxyZ1l4MhhWswTjlHtDOvx11RUge'} /* PASTE your two Polar checkout links here (Polar > Products > Share). They must start with https://buy.polar.sh/ . Leave '' until you have them: the button then shows 'Opens soon'. */, CONTACT_EMAIL:'support@kaizenovsigma.com' /* fallback for the feedback form */};
 /* ===== YOUR PAYMENT ACCOUNT (shown to customers who pay by bank transfer or wallet). Replace every YOUR... value. ===== */
 const SP_PAY={bank:'Meezan Bank', qr:'pay-qr.png' /* your QR image */, title:'', account:'', iban:'', wallet:'' /* optional extra text lines shown under the QR */};
 /* One personal computer: a private random ID kept in this browser plus a coarse hardware signature. */
@@ -1295,7 +1325,36 @@ const DEV=(()=>{let id;try{id=localStorage.getItem('sp_dev');if(!id){id=crypto.r
   const fp=[navigator.platform,navigator.hardwareConcurrency,Intl.DateTimeFormat().resolvedOptions().timeZone,screen.width+'x'+screen.height].join('|');return id+'|'+btoa(fp).slice(0,40)})();
 const SP=(()=>{
   const ok=()=>SP_CFG.SUPABASE_URL&&SP_CFG.SUPABASE_ANON_KEY&&SP_CFG.API&&window.supabase;
-  let sb=null, session=null, status=null, email='';
+  let sb=null, session=null, status=null, email='', pendingPlan=null;
+  /* ---- Region: Pakistan sees PKR bank transfer; everyone else sees USD card checkout. ---- */
+  let region=(()=>{try{const v=sessionStorage.getItem('sp_region');if(v==='PK'||v==='INTL')return v;}catch(e){}
+    try{return Intl.DateTimeFormat().resolvedOptions().timeZone==='Asia/Karachi'?'PK':'INTL';}catch(e){return 'INTL';}})();
+  let regionChosen=false; try{regionChosen=!!sessionStorage.getItem('sp_region');}catch(e){}
+  function applyRegion(){
+    const pk=$('pricePK'),intl=$('priceINTL'); if(!pk||!intl)return;
+    /* Both price lists are always visible; the visitor's own region is simply shown first. */
+    pk.style.order=region==='PK'?'0':'1'; intl.style.order=region==='PK'?'1':'0';
+  }
+  function setRegion(r){region=r; regionChosen=true; try{sessionStorage.setItem('sp_region',r);}catch(e){} applyRegion();}
+  async function detectRegion(){
+    if(regionChosen)return;
+    try{ /* Cloudflare reports the visitor's country on every proxied site */
+      const t=await (await fetch('/cdn-cgi/trace',{cache:'no-store'})).text(); const m=/^loc=([A-Z]{2})$/m.exec(t);
+      if(m&&!regionChosen){region=(m[1]==='PK')?'PK':'INTL'; applyRegion();}
+    }catch(e){}
+  }
+  const POLAR_OK=u=>{try{const x=new URL(u);return x.protocol==='https:'&&(x.hostname==='polar.sh'||x.hostname.endsWith('.polar.sh'));}catch(e){return false;}};
+  function usdButtons(){
+    return `<button class="btn-ghost" onclick="SP.subscribeUSD('individual')">SigmaPro Individual · $10/month</button><button class="btn-primary" onclick="SP.subscribeUSD('team')">SigmaPro Team · $90/month</button><p style="font-size:.8rem;margin:0">Card payment, secure checkout by Polar. Access activates automatically after payment.</p>`;
+  }
+  function pkrButtons(){
+    return `<button class="btn-ghost" onclick="SP.buy('credit1')">This report · 200 PKR</button><button class="btn-primary" onclick="SP.buy('pass30')">Monthly pass · 1,000 PKR</button><button class="btn-ghost" onclick="SP.buy('pass365')">Yearly pass · 10,000 PKR</button>`;
+  }
+  function buyButtons(){
+    const pk='<div class="sp-grp">Pakistan · PKR, bank transfer</div>'+pkrButtons();
+    const us='<div class="sp-grp">International · USD, card</div>'+usdButtons();
+    return region==='PK'?pk+us:us+pk;
+  }
   const $=id=>document.getElementById(id);
   const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const open=h=>{$('spBody').innerHTML=h; $('spBack').classList.add('open'); const i=$('spBody').querySelector('input'); if(i)i.focus();};
@@ -1307,32 +1366,62 @@ const SP=(()=>{
     b.textContent=t;
   }
   async function refresh(){ if(!session)return; try{const r=await api('status'); if(r.ok)status=await r.json();}catch(e){} chip(); }
-  function loginStep1(){open(`<h3 id="spTitle">Log in or start your free trial</h3><p>We email you a one-time code. New accounts get 30 days free.</p><input class="sp-in" id="spEmail" type="email" placeholder="you@company.com" autocomplete="email"><button class="btn-primary" onclick="SP.sendCode()">Send code</button>`);}
+  function loginStep1(){open(`<h3 id="spTitle">Log in or start your free trial</h3><p>We email you a one-time code. New accounts get 10 days free.</p><input class="sp-in" id="spEmail" type="email" placeholder="you@company.com" autocomplete="email"><button class="btn-primary" onclick="SP.sendCode()">Send code</button>`);}
+  let resendTimer=null;
+  function startResendTimer(){
+    const b=$('spResend'); if(!b)return; let n=60; clearInterval(resendTimer);
+    b.disabled=true; b.textContent='Resend code in '+n+'s';
+    resendTimer=setInterval(()=>{
+      n--; const x=$('spResend');
+      if(!x){clearInterval(resendTimer);return;}
+      if(n<=0){clearInterval(resendTimer); x.disabled=false; x.textContent='Resend code';}
+      else x.textContent='Resend code in '+n+'s';
+    },1000);
+  }
+  function codeScreen(){
+    open(`<h3 id="spTitle">Enter your code</h3><p>Sent to <b id="spTo"></b>. Check spam if it does not arrive in a minute.</p><input class="sp-in" id="spCode" inputmode="numeric" maxlength="8" placeholder="123456" autocomplete="one-time-code"><button class="btn-primary" onclick="SP.verify()">Log in</button><button class="btn-ghost" id="spResend" onclick="SP.resendCode()" disabled>Resend code</button><p style="margin-top:10px;font-size:.85rem"><a href="#" onclick="SP.changeEmail();return false;">Use a different email</a></p>`);
+    $('spTo').textContent=email; startResendTimer();
+  }
   async function sendCode(){
     email=$('spEmail').value.trim(); if(!/^\S+@\S+\.\S+$/.test(email)){toast('Enter a valid email');return;}
     const {error}=await sb.auth.signInWithOtp({email,options:{shouldCreateUser:true}});
     if(error){toast('Could not send the code: '+error.message);return;}
-    open(`<h3 id="spTitle">Enter your code</h3><p>Sent to <b id="spTo"></b>. Check spam if it does not arrive in a minute.</p><input class="sp-in" id="spCode" inputmode="numeric" maxlength="8" placeholder="123456" autocomplete="one-time-code"><button class="btn-primary" onclick="SP.verify()">Log in</button>`);
-    $('spTo').textContent=email;
+    codeScreen();
+  }
+  async function resendCode(){
+    if(!email){loginStep1();return;}
+    const {error}=await sb.auth.signInWithOtp({email,options:{shouldCreateUser:true}});
+    if(error){toast('Could not resend the code: '+error.message);return;}
+    toast('A new code was sent'); startResendTimer();
   }
   async function verify(){
-    const {error}=await sb.auth.verifyOtp({email,token:$('spCode').value.trim(),type:'email'});
+    const {data,error}=await sb.auth.verifyOtp({email,token:$('spCode').value.trim(),type:'email'});
     if(error){toast('Code not accepted. Check it and try again.');return;}
+    if(data&&data.session)session=data.session;
     close(); toast('Logged in');
+    if(pendingPlan){const p=pendingPlan;pendingPlan=null;subscribeUSD(p);}
   }
   const PROD={credit1:['One report (1 file)',200],pass30:['Monthly pass: 1 month, 1 computer',1000],pass365:['Yearly pass: 1 year, 1 computer',10000]};
-  function payModal(msg){open(`<h3 id="spTitle">Get your report</h3><p>${esc(msg||'Choose how you want to pay.')}</p><button class="btn-ghost" onclick="SP.buy('credit1')">This report · 200 PKR</button><button class="btn-primary" onclick="SP.buy('pass30')">Monthly pass · 1,000 PKR</button><button class="btn-ghost" onclick="SP.buy('pass365')">Yearly pass · 10,000 PKR</button>`);}
+  function payModal(msg){open(`<h3 id="spTitle">Get your report</h3><p>${esc(msg||'Choose how you want to pay.')}</p>${buyButtons()}`);}
   function openAccount(){
     if(!ok()){toast('Sign-in is not configured yet');return;}
     if(!session){loginStep1();return;}
     const s=status||{},row=(a,b)=>`<div class="sp-row"><span>${a}</span><b>${esc(b)}</b></div>`;
-    open(`<h3 id="spTitle">Your account</h3><p id="spMail"></p>${row('Status',{trial:'Free trial',sub:s.plan==='yearly'?'Yearly pass':'Monthly pass',credit:'Pay per report',none:'No active plan'}[s.state]||'…')}${row('Report credits',s.credits??0)}${s.state==='trial'?row('Trial days left',s.days):''}${s.ends?row('Pass valid until',String(s.ends).slice(0,10)):''}${row('Computer',{ok:'This computer',other:'Another computer',unbound:'Not set yet'}[s.device]||'…')}${s.pending?row('Payments awaiting check',s.pending):''}<div style="height:14px"></div><button class="btn-ghost" onclick="SP.buy('credit1')">Buy 1 report · 200 PKR</button><button class="btn-primary" onclick="SP.buy('pass30')">Monthly pass · 1,000 PKR</button><button class="btn-ghost" onclick="SP.buy('pass365')">Yearly pass · 10,000 PKR</button>${s.device==='other'?'<button class="btn-ghost" onclick="SP.reset()">Use this computer</button>':''}<button class="btn-ghost" onclick="SP.logout()">Log out</button>`);
+    open(`<h3 id="spTitle">Your account</h3><p id="spMail"></p>${row('Status',{trial:'Free trial',sub:s.plan==='yearly'?'Yearly pass':'Monthly pass',credit:'Pay per report',none:'No active plan'}[s.state]||'…')}${row('Report credits',s.credits??0)}${s.state==='trial'?row('Trial days left',s.days):''}${s.ends?row('Pass valid until',String(s.ends).slice(0,10)):''}${row('Computer',{ok:'This computer',other:'Another computer',unbound:'Not set yet'}[s.device]||'…')}${s.pending?row('Payments awaiting check',s.pending):''}<div style="height:14px"></div>${buyButtons()}${s.device==='other'?'<button class="btn-ghost" onclick="SP.reset()">Use this computer</button>':''}<button class="btn-ghost" onclick="SP.logout()">Log out</button>`);
     $('spMail').textContent=session.user.email;
   }
   function buy(product){
     if(!ok()){toast('Payments are not configured yet');return;}
     if(!session){loginStep1();return;}
     SP_CFG.GATEWAY?gateway(product):manual(product);
+  }
+  function subscribeUSD(plan){
+    if(!ok()){toast('Payments are not configured yet');return;}
+    if(!session){pendingPlan=plan;loginStep1();return;}
+    const base=(SP_CFG.POLAR_CHECKOUT||{})[plan]; if(!POLAR_OK(base)){toast('This plan opens soon');return;}
+    /* The account ID travels as reference_id so the payment is matched to this account. Access is only ever granted by the server after Polar confirms payment. */
+    const u=new URL(base); u.searchParams.set('customer_email',session.user.email); u.searchParams.set('reference_id',session.user.id);
+    location.href=u.toString();
   }
   async function gateway(product){
     const r=await api('checkout',{method:'POST',body:JSON.stringify({product})});
@@ -1363,7 +1452,7 @@ const SP=(()=>{
     if(!session){loginStep1();return;}
     const r=await api('report',{method:'POST',body:JSON.stringify({kind,text})});
     if(r.status===402){payModal('You have no active trial, pass or file credit. Pay for this file or take a pass.');return;}
-    if(r.status===403){open('<h3 id="spTitle">Another computer is registered</h3><p>Downloads are licensed for one personal computer. To move your licence to this computer, reset it (allowed 2 times per year).</p><button class="btn-primary" onclick="SP.reset()">Use this computer</button>');return;}
+    if(r.status===403){open('<h3 id="spTitle">Another computer is registered</h3><p>Each licence covers a set number of personal computers (SigmaPro Individual and the PKR passes: one; SigmaPro Team: up to ten). To move your licence to this computer, reset it (allowed 2 times per year).</p><button class="btn-primary" onclick="SP.reset()">Use this computer</button>');return;}
     if(!r.ok){toast('Download failed. You were not charged.');return;}
     const a=document.createElement('a'); a.href=URL.createObjectURL(await r.blob()); a.download=`sigmapro-${kind}-report.docx`; a.click();
     refresh();
@@ -1397,7 +1486,16 @@ const SP=(()=>{
     sb.auth.getSession().then(({data})=>{session=data.session;chip();refresh();});
     sb.auth.onAuthStateChange((_e,sess)=>{session=sess;status=null;chip();refresh();});}
   sponsors();
-  return {openAccount,sendCode,verify,buy,manualSend,reset,download,fbSend,logout,close};
+  applyRegion(); detectRegion();
+  /* Buttons stay disabled until a real Polar link is configured. */
+  document.querySelectorAll('[data-usd]').forEach(b=>{if(!POLAR_OK((SP_CFG.POLAR_CHECKOUT||{})[b.dataset.usd])){b.disabled=true;b.textContent='Opens soon';}});
+  /* Polar sends buyers back with ?paid=1 (set this as the Success URL). This only shows a message: access is granted by the server, never by this flag. */
+  if(/[?&]paid=1\b/.test(location.search)){
+    try{history.replaceState(null,'',location.pathname+location.hash);}catch(e){}
+    open('<h3 id="spTitle">Thank you</h3><p>Your payment is being confirmed. Your access activates automatically, usually within a minute or two. Log in with the same email you used at checkout.</p><button class="btn-primary" onclick="SP.close()">OK</button>');
+    let n=0; const t=setInterval(()=>{refresh(); if(++n>=8)clearInterval(t);},8000);
+  }
+  return {setRegion,openAccount,sendCode,resendCode,changeEmail:loginStep1,verify,buy,subscribeUSD,manualSend,reset,download,fbSend,logout,close};
 })();
 /* Replaces the old free .txt download: every report now goes through the server check. */
 function downloadReport(kind){SP.download(kind);}
